@@ -1,0 +1,104 @@
+<html>
+<head>
+<script type = "text/javascript">
+
+function removeAllChildren(node)
+{
+	while(node.childNodes.length >= 1) {
+		node.removeChild(node.firstChild);
+	}
+
+}
+
+function Input(form)
+{
+  var name;
+  name = form.TwitterUser.value;
+
+  var numTweets;
+  numTweets = form.numTweets.value;
+
+  var xmlhttp;
+  if (window.XMLHttpRequest)
+  {// code for IE7+, Firefox, Chrome, Opera, Safari
+
+    xmlhttp=new XMLHttpRequest();
+  }
+  else
+  {// code for IE6, IE5
+    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+
+  xmlhttp.onreadystatechange=function()
+  {
+    if(xmlhttp.readyState == 4)
+    {
+      if(xmlhttp.status == 403)
+      {
+        myDiv = document.getElementById("tweetlist");
+        removeAllChildren(myDiv);
+        newItem = document.createElement("li");
+        newItem.innerHTML= "Please enter a maximum of 20 tweets";
+        myDiv.appendChild(newItem);
+      }
+      else if(xmlhttp.status == 404)
+      {
+        myDiv = document.getElementById("tweetlist");
+		removeAllChildren(myDiv);
+		newItem = document.createElement("li");
+		newItem.innerHTML= "The entered name does not correspond to a Twitter username, please try again.";
+        myDiv.appendChild(newItem);
+      }
+      else
+      {
+
+        var list = {};
+        var newItem = null;
+        var myDiv = null;
+        var count = 1;
+
+        list = JSON.parse(xmlhttp.responseText);
+
+
+        myDiv = document.getElementById("tweetlist");
+        removeAllChildren(myDiv);
+        while((count - 1) < numTweets)
+        {
+          newItem = document.createElement("li");
+          newItem.innerHTML= list[count - 1];
+          myDiv.appendChild(newItem);
+          count++;
+        }
+      }
+    }
+  }
+  xmlhttp.open("GET","/tweets/" + name + "/" + numTweets + "/",true);
+  xmlhttp.send();
+
+}
+</script>
+</head>
+<body>
+
+<form>
+Twitter User: <input type="text" name="TwitterUser" /><br />
+Number of Tweets: <input type="text" name="numTweets" />
+<input id="clickMe" type="button" value="Get Tweets" onclick="Input(this.form)" >
+</form>
+
+
+
+
+<ul id="tweetlist">
+
+
+</ul>
+</body>
+
+<script>
+</script>
+
+
+
+
+</html>
