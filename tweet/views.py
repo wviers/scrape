@@ -9,7 +9,6 @@ import httplib
 
 
 def get_tweets(twitter_name, count):
-    tweets = []
     conn = httplib.HTTPConnection("www.twitter.com")
     tweet_strings = []
     iterations = 0
@@ -27,7 +26,7 @@ def get_tweets(twitter_name, count):
             	data2 = json.loads(data1)
     	    	print ""
 	    except:
-	    	return 'BROKEN' + data1
+	    	return 'dogs'
 		
        	    while iterations < int(count):
                 tweet_strings.append(data2[iterations]['text'])

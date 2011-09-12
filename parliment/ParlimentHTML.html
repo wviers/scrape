@@ -12,9 +12,22 @@ function removeAllChildren(node)
 
 }
 
-function Input(form)
+function Input()
 {
+  alert("IN FUNCTION");
+  var query;
   var xmlhttp;
+  query = "PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/>PREFIX gn: <http://www.geonames.org/ontology#>PREFIX gu: <http://cegis.usgs.gov/rdf/gu/featureID#>SELECT DISTINCT ?schoolWHERE { GRAPH <http://example.org/data> {# get Georgia geometrygu:_1705317
+  geo:hasGeometry ?ga_geo .
+# get schools within Georgia
+  ?school a gn:Feature ;
+   geo:hasGeometry ?school_geo ;
+   gn:featureCode gn:S.SCH .
+
+  ?school_geo geo:sf-within ?ga_geo .
+ }
+}";
+
   if (window.XMLHttpRequest)
   {// code for IE7+, Firefox, Chrome, Opera, Safari
 
@@ -35,7 +48,7 @@ function Input(form)
 
     }
   }
-  xmlhttp.open("GET","/tweets/" + name + "/" + numTweets + "/",true);
+  xmlhttp.open("GET","/parliment/" + query + "/",true);
   xmlhttp.send();
 
 }
@@ -44,7 +57,7 @@ function Input(form)
 <body>
 
 <form>
-<input id="clickMe" type="button" value="Submit" onclick="Input(this.form)" >
+<input type="button" value="Send Query" onclick="Input()" />
 </form>
 
 
@@ -55,11 +68,6 @@ function Input(form)
 
 </ul>
 </body>
-
-<script>
-</script>
-
-
 
 
 </html>

@@ -13,8 +13,8 @@ function removeAllChildren(node)
 
 function Input(form)
 {
-  var name;
-  name = form.TwitterUser.value;
+  var twitterName;
+  twitterName = form.TwitterUser.value;
 
   var numTweets;
   numTweets = form.numTweets.value;
@@ -73,7 +73,7 @@ function Input(form)
       }
     }
   }
-  xmlhttp.open("GET","/tweets/" + name + "/" + numTweets + "/",true);
+  xmlhttp.open("GET","/tweets/" + twitterName + "/" + numTweets + "/",true);
   xmlhttp.send();
 
 }
@@ -88,18 +88,10 @@ Number of Tweets: <input type="text" name="numTweets" />
 </form>
 
 
-
-
 <ul id="tweetlist">
 
 
 </ul>
 </body>
-
-<script>
-</script>
-
-
-
 
 </html>
