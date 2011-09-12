@@ -1,0 +1,65 @@
+<html>
+<head>
+<script type = "text/javascript">
+
+
+function removeAllChildren(node)
+{
+  while(node.childNodes.length >= 1)
+  {
+    node.removeChild(node.firstChild);
+  }
+
+}
+
+function Input(form)
+{
+  var xmlhttp;
+  if (window.XMLHttpRequest)
+  {// code for IE7+, Firefox, Chrome, Opera, Safari
+
+    xmlhttp=new XMLHttpRequest();
+  }
+  else
+  {// code for IE6, IE5
+    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+
+  xmlhttp.onreadystatechange=function()
+  {
+    if(xmlhttp.readyState == 4)
+    {
+
+
+
+
+    }
+  }
+  xmlhttp.open("GET","/tweets/" + name + "/" + numTweets + "/",true);
+  xmlhttp.send();
+
+}
+</script>
+</head>
+<body>
+
+<form>
+<input id="clickMe" type="button" value="Submit" onclick="Input(this.form)" >
+</form>
+
+
+
+
+<ul id="tweetlist">
+
+
+</ul>
+</body>
+
+<script>
+</script>
+
+
+
+
+</html>

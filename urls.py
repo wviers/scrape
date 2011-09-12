@@ -8,6 +8,8 @@ urlpatterns = patterns('',
     (r'^tweets/(?P<twitter_name>\w+)/(?P<count>\d+)/$', 'tweet.views.tweet_view'),
     
     (r'^tweets/$', 'tweet.views.load_HTML'),
+    
+    (r'^parliment/$', 'parliment.views.load_HTML'),
         
     # Examples:
     # url(r'^$', 'scrape.views.home', name='home'),

@@ -103,7 +103,8 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'scrape.urls'
 
 TEMPLATE_DIRS = (
-	"/cygdrive/d/My Files/code/scrape/tweet/"
+	"/cygdrive/d/My Files/code/scrape/tweet/",
+	"/cygdrive/d/My Files/code/scrape/parliment/"
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -116,7 +117,8 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'scrape.tweet'
+    'scrape.tweet',
+    'scrape.parliment'
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
