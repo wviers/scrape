@@ -9,7 +9,7 @@ urlpatterns = patterns('',
     
     (r'^tweets/$', 'tweet.views.load_HTML'),
     
-    (r'^tweets/(?P<query>\w+)/$', 'parliment.views.get_triples'),
+    (r'^parliment/sparql/$', 'parliment.views.get_triples'),
     
     (r'^parliment/$', 'parliment.views.load_HTML'),
         

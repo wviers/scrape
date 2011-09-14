@@ -14,19 +14,9 @@ function removeAllChildren(node)
 
 function Input()
 {
-  alert("IN FUNCTION");
   var query;
   var xmlhttp;
-  query = "PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/>PREFIX gn: <http://www.geonames.org/ontology#>PREFIX gu: <http://cegis.usgs.gov/rdf/gu/featureID#>SELECT DISTINCT ?schoolWHERE { GRAPH <http://example.org/data> {# get Georgia geometrygu:_1705317
-  geo:hasGeometry ?ga_geo .
-# get schools within Georgia
-  ?school a gn:Feature ;
-   geo:hasGeometry ?school_geo ;
-   gn:featureCode gn:S.SCH .
-
-  ?school_geo geo:sf-within ?ga_geo .
- }
-}";
+  query = "PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> PREFIX gn: <http://www.geonames.org/ontology#> PREFIX gu: <http://cegis.usgs.gov/rdf/gu/featureID#> SELECT DISTINCT ?school WHERE { GRAPH <http://example.org/data> { gu:_1705317 geo:hasGeometry ?ga_geo . ?school a gn:Feature ; geo:hasGeometry ?school_geo ; gn:featureCode gn:S.SCH . ?school_geo geo:sf-within ?ga_geo . } }";
 
   if (window.XMLHttpRequest)
   {// code for IE7+, Firefox, Chrome, Opera, Safari
@@ -43,12 +33,9 @@ function Input()
     if(xmlhttp.readyState == 4)
     {
 
-
-
-
     }
   }
-  xmlhttp.open("GET","/parliment/" + query + "/",true);
+  xmlhttp.open("GET","/parliment/sparql?query=" + encodeURIComponent(query),true);
   xmlhttp.send();
 
 }
@@ -63,7 +50,7 @@ function Input()
 
 
 
-<ul id="tweetlist">
+<ul id="return">
 
 
 </ul>
