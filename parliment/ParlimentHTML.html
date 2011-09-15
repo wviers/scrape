@@ -32,7 +32,17 @@ function Input()
   {
     if(xmlhttp.readyState == 4)
     {
+      var list = [];
+	  var newItem = null;
+	  var myDiv = null;
 
+	  list = JSON.parse(xmlhttp.responseText);
+
+      myDiv = document.getElementById("return");
+	  removeAllChildren(myDiv);
+	  newItem = document.createElement("li");
+	  newItem.innerHTML= list[4];
+	  myDiv.appendChild(newItem);
     }
   }
   xmlhttp.open("GET","/parliment/sparql?query=" + encodeURIComponent(query),true);

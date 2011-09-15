@@ -26,7 +26,7 @@ def get_tweets(twitter_name, count):
             	data2 = json.loads(data1)
     	    	print ""
 	    except:
-	    	return 'dogs'
+	    	return 'BROKEN DATA'
 		
        	    while iterations < int(count):
                 tweet_strings.append(data2[iterations]['text'])

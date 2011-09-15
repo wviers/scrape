@@ -6,16 +6,17 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 import json
 import httplib
-
+import urllib
 
 def make_request(query):
     conn = httplib.HTTPConnection("geosparql.bbn.com")	    
-    response = []
-    conn.request("GET", "/parliament/sparql?query=" + query)
+    conn.request("GET", "/parliament/sparql?query=" + urllib.quote_plus(query))
     r1 = conn.getresponse()
     print r1.status, r1.reason
-    request = r1
-        		
+
+    if r1.status == 200: 
+        response = r1.read()
+    	
     conn.close
 	
     return response
@@ -25,6 +26,9 @@ def get_triples(request):
     request_strings = make_request(query)
     return HttpResponse(json.dumps(request_strings))
 
+
+def get_coords(query):
+    conn = httplib.HTTPConnection("geosparql.bbn.com")
 
 
 def load_HTML(request):
