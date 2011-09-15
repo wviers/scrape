@@ -9,14 +9,20 @@ import httplib
 import urllib
 
 def make_request(query):
+    tweet_strings = []
+    iterations = 0
+    print ":FJFJFJFJFJF"
+    params = urllib.urlquote_plus({'?query':query, '?display':'json'})
     conn = httplib.HTTPConnection("geosparql.bbn.com")	    
-    conn.request("GET", "/parliament/sparql?query=" + urllib.quote_plus(query))
+    conn.request("POST", "/parliament/sparql", params)
     r1 = conn.getresponse()
     print r1.status, r1.reason
 
     if r1.status == 200: 
         response = r1.read()
-    	
+    
+ 
+	        
     conn.close
 	
     return response
