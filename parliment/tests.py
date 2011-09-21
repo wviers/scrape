@@ -6,11 +6,26 @@ Replace this with more appropriate tests for your application.
 """
 
 from django.test import TestCase
+from django.utils import unittest
+from scrape.parliment import views
+from django.test.client import RequestFactory
 
 
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
+class TestMakeRequest(unittest.TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+    
+    def test_connection(self):
         """
-        Tests that 1 + 1 always equals 2.
+        Tests that the function returns an empty list for a nonsense query.
         """
-        self.assertEqual(1 + 1, 2)
+        request = self.factory.get('parliment/sparql/?query=dknfgklans')
+        
+        response = views.make_request(request)
+        self.assertEqual(response, [])
+
+
+    def test_json(self):
+       """
+       Tests the json is dumped correctly to the html.
+       """

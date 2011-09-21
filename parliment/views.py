@@ -9,20 +9,34 @@ import httplib
 import urllib
 
 def make_request(query):
-    tweet_strings = []
-    iterations = 0
-    print ":FJFJFJFJFJF"
-    params = urllib.urlquote_plus({'?query':query, '?display':'json'})
-    conn = httplib.HTTPConnection("geosparql.bbn.com")	    
-    conn.request("POST", "/parliament/sparql", params)
+    response = []
+    params = urllib.urlencode({'query':query, 'output':'json'})
+    headers = {"Content-type": "application/x-www-form-urlencoded",
+    "Accept": "text/plain"}
+    conn = httplib.HTTPConnection("geosparql.bbn.com")
+    conn.request("POST", "/parliament/sparql", params, headers)
     r1 = conn.getresponse()
     print r1.status, r1.reason
-
+    
+    #if r1.status == 200: 
+    #    response = r1.read()
+	
+	
     if r1.status == 200: 
         response = r1.read()
-    
- 
-	        
+	try: 
+	    data2 = json.loads(response)
+	    print ""
+	    print data2['results']['school']
+	except:
+	    return 'BROKEN DATA'
+			
+		        
+		
+
+	
+	
+	
     conn.close
 	
     return response
