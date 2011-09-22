@@ -35,13 +35,21 @@ function Input()
       var list = [];
 	  var newItem = null;
 	  var myDiv = null;
+	  count = 1
 
 	  list = JSON.parse(xmlhttp.responseText);
-
+      alert(list.length);
       myDiv = document.getElementById("return");
 	  removeAllChildren(myDiv);
+	  while((count - 1) < list.length)
+	  {
+	    newItem = document.createElement("a");
+	    newItem.innerHTML= list[count - 1];
+	    myDiv.appendChild(newItem);
+	    count++;
+      }
 	  newItem = document.createElement("li");
-	  newItem.innerHTML= list;
+	  newItem.innerHTML= list[0];
 	  myDiv.appendChild(newItem);
     }
   }

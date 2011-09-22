@@ -10,6 +10,9 @@ import urllib
 
 def make_request(query):
     response = []
+    iterations = 0
+    return_list = []
+    
     params = urllib.urlencode({'query':query, 'output':'json'})
     headers = {"Content-type": "application/x-www-form-urlencoded",
     "Accept": "text/plain"}
@@ -18,8 +21,6 @@ def make_request(query):
     r1 = conn.getresponse()
     print r1.status, r1.reason
     
-    #if r1.status == 200: 
-    #    response = r1.read()
 	
 	
     if r1.status == 200: 
@@ -27,19 +28,25 @@ def make_request(query):
 	try: 
 	    data2 = json.loads(response)
 	    print ""
-	    print data2['results']['school']
+	    print "ELEMENT"
+	    items = len(data2['results']['bindings'])
+	    print items
+	    print ""
 	except:
 	    return 'BROKEN DATA'
 			
 		        
 		
-
+    while (iterations < items):
+        print data2['results']['bindings'][iterations]['school']['value']
+        return_list.append(data2['results']['bindings'][iterations]['school']['value'])
+        iterations = iterations + 1
 	
 	
 	
     conn.close
 	
-    return response
+    return return_list
 
 def get_triples(request):
     query = request.GET['query']
