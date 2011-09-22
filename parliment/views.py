@@ -28,9 +28,7 @@ def make_request(query):
 	try: 
 	    data2 = json.loads(response)
 	    print ""
-	    print "ELEMENT"
 	    items = len(data2['results']['bindings'])
-	    print items
 	    print ""
 	except:
 	    return 'BROKEN DATA'
@@ -38,7 +36,6 @@ def make_request(query):
 		        
 		
     while (iterations < items):
-        print data2['results']['bindings'][iterations]['school']['value']
         return_list.append(data2['results']['bindings'][iterations]['school']['value'])
         iterations = iterations + 1
 	

@@ -25,7 +25,6 @@ def get_tweets(twitter_name, count):
 	    try: 
             	data2 = json.loads(data1)
     	    	print ""
-    	    	print data2
 	    except:
 	    	return 'BROKEN DATA'
 		

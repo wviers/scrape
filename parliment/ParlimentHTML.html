@@ -3,28 +3,20 @@
 <script type = "text/javascript">
 
 
-function removeAllChildren(node)
-{
-  while(node.childNodes.length >= 1)
-  {
-    node.removeChild(node.firstChild);
-  }
-
-}
-
 function Input()
 {
   var query;
   var xmlhttp;
+
   query = "PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> PREFIX gn: <http://www.geonames.org/ontology#> PREFIX gu: <http://cegis.usgs.gov/rdf/gu/featureID#> SELECT DISTINCT ?school WHERE { GRAPH <http://example.org/data> { gu:_1705317 geo:hasGeometry ?ga_geo . ?school a gn:Feature ; geo:hasGeometry ?school_geo ; gn:featureCode gn:S.SCH . ?school_geo geo:sf-within ?ga_geo . } }";
 
   if (window.XMLHttpRequest)
-  {// code for IE7+, Firefox, Chrome, Opera, Safari
+  {
 
     xmlhttp=new XMLHttpRequest();
   }
   else
-  {// code for IE6, IE5
+  {
     xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
   }
 
@@ -32,30 +24,30 @@ function Input()
   {
     if(xmlhttp.readyState == 4)
     {
+
       var list = [];
-	  var newItem = null;
-	  var myDiv = null;
-	  count = 1
+	  count = 1;
 
 	  list = JSON.parse(xmlhttp.responseText);
-      alert(list.length);
-      myDiv = document.getElementById("return");
-	  removeAllChildren(myDiv);
+      document.write('<html><body><ul>');
+
 	  while((count - 1) < list.length)
 	  {
-	    newItem = document.createElement("a");
-	    newItem.innerHTML= list[count - 1];
-	    myDiv.appendChild(newItem);
+	    //parse for the id
+	  	document.write('<li>');
+		document.write('<a href="/parliment/' + list[count - 1] + '">');
+	    document.write(list[count - 1]);
+	    document.write('</a>');
+	    document.write('</li>');
+
 	    count++;
       }
-	  newItem = document.createElement("li");
-	  newItem.innerHTML= list[0];
-	  myDiv.appendChild(newItem);
+      document.write('</ul></body></html>');
+
     }
   }
   xmlhttp.open("GET","/parliment/sparql?query=" + encodeURIComponent(query),true);
   xmlhttp.send();
-
 }
 </script>
 </head>
@@ -65,14 +57,5 @@ function Input()
 <input type="button" value="Send Query" onclick="Input()" />
 </form>
 
-
-
-
-<ul id="return">
-
-
-</ul>
 </body>
-
-
 </html>
