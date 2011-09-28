@@ -48,3 +48,6 @@ def tweet_view(request, twitter_name, count):
 
 def load_HTML(request):
     return render_to_response('TweetHTML.html')
+    
+    
+    
