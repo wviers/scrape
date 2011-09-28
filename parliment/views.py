@@ -51,9 +51,44 @@ def get_triples(request):
     return HttpResponse(json.dumps(request_strings))
 
 
-def get_coords(query):
+def get_coords(request, num, query2):
+    response = []
+    iterations = 0
+    return_list = []
+        
     conn = httplib.HTTPConnection("geosparql.bbn.com")
-
+    conn.request("GET", "/parliament/sparql?query=" + query2)
+    r1 = conn.getresponse()
+    print r1.status, r1.reason
+        
+    	
+    	
+    if r1.status == 200: 
+        response = r1.read()
+    try: 
+    	data2 = json.loads(response)
+    	print ""
+    	items = len(data2['results']['bindings'])
+    	print ""
+    except:
+    	return 'BROKEN DATA'
+    			
+    		        
+    		
+    while (iterations < items):
+        return_list.append(data2['results']['bindings'][iterations]['school']['value'])
+        iterations = iterations + 1
+    	
+    	
+    	
+    conn.close
+    	
+    return return_list
 
 def load_HTML(request):
     return render_to_response('ParlimentHTML.html')
+    
+    
+    
+    
+    
