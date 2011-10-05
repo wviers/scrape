@@ -11,7 +11,7 @@ urlpatterns = patterns('',
     
     (r'^parliment/sparql/$', 'parliment.views.get_triples'),
     
-    (r'^parliment/coords/(?P<num>\w+)/(?P<query2>\w+)/$', 'parliment.views.get_coords'),
+    (r'^parliment/coords/(?P<num>\w+)/$', 'parliment.views.get_coords'),
     
     (r'^parliment/$', 'parliment.views.load_HTML'),
         

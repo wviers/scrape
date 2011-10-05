@@ -12,7 +12,7 @@ def get_tweets(twitter_name, count):
     conn = httplib.HTTPConnection("www.twitter.com")
     tweet_strings = []
     iterations = 0
-	    
+    print count
     print "searching ", twitter_name
     print ""
     conn.request("GET", "/statuses/user_timeline.json?screen_name=" + twitter_name + "&count= " + count)
@@ -22,6 +22,7 @@ def get_tweets(twitter_name, count):
     if r1.status == 200:
         if int(count) <= 20: 
             data1 = r1.read()
+            print data1
 	    try: 
             	data2 = json.loads(data1)
     	    	print ""
@@ -39,10 +40,11 @@ def get_tweets(twitter_name, count):
 
 def tweet_view(request, twitter_name, count):
     if(int(count) > 20):
-      return HttpResponse(status=403)
+        return HttpResponse(status=403)
     tweet_strings = get_tweets(twitter_name, count)
     if(tweet_strings == []):
-      return HttpResponse(status=404)
+        print "IN THE "
+        return HttpResponse(status=404)
     return HttpResponse(json.dumps(tweet_strings))
 
 
