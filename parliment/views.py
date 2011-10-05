@@ -62,7 +62,7 @@ def get_coords(request, num):
                 PREFIX gu: <http://cegis.usgs.gov/rdf/gu/featureID#> 
                 PREFIX coor: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> 
                 PREFIX geoname: <http://sws.geonames.org/>
-                SELECT DISTINCT ?geo WHERE { 
+                SELECT DISTINCT ?Coordinates WHERE { 
                 GRAPH <http://example.org/data> 
                 { 
 
@@ -93,12 +93,8 @@ def get_coords(request, num):
         except:
 	    return 'BROKEN DATA'
     
-    print "BEFORE"
-    print data2
-    print (data2['head']['vars'])
-    print (data2['results']['bindings'])
-    print "AFTER"
-    return_list.append(data2['head']['vars'][0])
+
+    return_list.append(data2['results']['bindings'][0]['Coordinates']['value'])
     	
     conn.close
     return HttpResponse(json.dumps(return_list))
