@@ -24,16 +24,6 @@ function Input()
   {
     if(xmlhttp.readyState == 4)
     {
-      if(xmlhttp.status == 400)
-      {
-        myDiv = document.getElementById("tweetlist");
-		removeAllChildren(myDiv);
-		newItem = document.createElement("li");
-		newItem.innerHTML= "Please enter a maximum of 20 tweets";
-        myDiv.appendChild(newItem);
-      }
-      else
-      {
         var list = [];
 	    count = 1;
 	    list = JSON.parse(xmlhttp.responseText);
@@ -50,7 +40,6 @@ function Input()
 	      count++;
         }
         document.write('</ul></body></html>');
-      }
     }
   }
   xmlhttp.open("GET","/parliment/sparql?query=" + encodeURIComponent(query),true);
