@@ -29,7 +29,7 @@ def get_tweets(twitter_name, count):
 	    except:
 	    	return 'BROKEN DATA'
 		
-       	    while iterations < int(count):
+       	    while (iterations < int(count)):
                 tweet_strings.append(data2[iterations]['text'])
 	        iterations = iterations + 1
 	        
