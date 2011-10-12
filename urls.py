@@ -14,6 +14,8 @@ urlpatterns = patterns('',
     (r'^parliment/coords/(?P<num>\w+)/$', 'parliment.views.get_coords'),
     
     (r'^parliment/$', 'parliment.views.load_HTML'),
+    
+    (r'^map/$', 'map.views.load_HTML'),
         
     # Examples:
     # url(r'^$', 'scrape.views.home', name='home'),
