@@ -3,14 +3,14 @@
 <script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAjpkAC9ePGem0lIq5XcMiuhR_wWLPFku8Ix9i2SXYRVK3e45q1BQUd_beF8dtzKET_EteAjPdGDwqpQ'></script>
 <script src="http://openlayers.org/api/OpenLayers.js"></script>
 <script type = "text/javascript">
-var map;
-
+var map, vectors, formats;
 function init()
 {
-map = new OpenLayers.Map('map');
+  map = new OpenLayers.Map('map');
 
-var satellite = new OpenLayers.Layer.Google("Google Satellite" , {type: G_SATELLITE_MAP});
-var wms = new OpenLayers.Layer.WMS("World Map","http://world.freemap.in/cgi-bin/mapserv",
+  var satellite = new OpenLayers.Layer.Google("Google Satellite" , {type: G_SATELLITE_MAP});
+  vectors = new OpenLayers.Layer.Vector("Vector Layer");
+  var wms = new OpenLayers.Layer.WMS("World Map","http://world.freemap.in/cgi-bin/mapserv",
                 {
                     map: '/www/freemap.in/world/map/factbooktrans.map',
                     layers: 'factbook'
@@ -18,19 +18,27 @@ var wms = new OpenLayers.Layer.WMS("World Map","http://world.freemap.in/cgi-bin/
                 {'reproject': true}
             );
 
-            map.addLayers([satellite, wms]);
+  map.addLayers([satellite, wms, vectors]);
+  map.addControl(new OpenLayers.Control.MousePosition());
+  map.addControl(new OpenLayers.Control.EditingToolbar(vectors));
+  map.setCenter(new OpenLayers.LonLat(-84.42,33.65), 11);
 
-            map.setCenter(new OpenLayers.LonLat(-91.7711111,37.9513889), 15);
+  UpdateFormats()
 }
 
 
+function UpdateFormats()
+{
+
+}
 
 function Input()
 {
-  var query, query2;
+  var query;
   var xmlhttp;
 
-  query = "PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> PREFIX gn: <http://www.geonames.org/ontology#> PREFIX gu: <http://cegis.usgs.gov/rdf/gu/featureID#> SELECT DISTINCT ?school WHERE { GRAPH <http://example.org/data> { gu:_1705317 geo:hasGeometry ?ga_geo . ?school a gn:Feature ; geo:hasGeometry ?school_geo ; gn:featureCode gn:S.SCH . ?school_geo geo:sf-within ?ga_geo . } }";
+  query = 'PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> PREFIX geo-sf: <http://www.opengis.net/def/dataType/OGC-SF/1.0/> PREFIX gn: <http://www.geonames.org/ontology#> SELECT DISTINCT ?school WHERE { GRAPH <http://example.org/data> { LET (?place := "POLYGON((-84.445 33.7991, -84.445 33.7069,-84.331 33.7069,-84.331 33.7991,-84.445 33.7991))"^^geo-sf:WKTLiteral) . ?school a gn:Feature ; geo:hasGeometry ?school_geo ; gn:featureCode gn:S.SCH . ?sparta_geo a geo:Geometry ; geo:asWKT ?place . ?school_geo geo:sf-within ?sparta_geo . } }';
+
 
   if (window.XMLHttpRequest)
   {
@@ -67,6 +75,35 @@ function Input()
   xmlhttp.send();
 }
 
+function Deserialize()
+{
+  var element = "POLYGON((-84.445 33.7991, -84.445 33.7069,-84.331 33.7069,-84.331 33.7991,-84.445 33.7991))";
+  var features = formats['in']['wkt'].read(element);
+        alert("DHD");
+  var bounds;
+  if(features)
+  {
+    if(features.constructor != Array)
+      features = [features];
+
+    for(var i=0; i<features.length; ++i)
+    {
+      if (!bounds)
+        bounds = features[i].geometry.getBounds();
+      else
+        bounds.extend(features[i].geometry.getBounds());
+
+
+    }
+    vectors.addFeatures(features);
+    map.zoomToExtent(bounds);
+    var plural = (features.length > 1) ? 's' : '';
+    element.value = features.length + ' feature' + plural + ' added';
+  }
+  else
+    element.value = 'Bad input ' + type;
+
+}
 
 
 </script>
@@ -74,7 +111,7 @@ function Input()
 <body onload = "init()">
 
 <form>
-<input type="button" value="Send Query" onclick="Input()" />
+<input type="button" value="Send Query" onclick="Deserialize()" />
 </form>
 
 
