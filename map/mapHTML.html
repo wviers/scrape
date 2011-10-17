@@ -19,18 +19,11 @@ function init()
             );
 
   map.addLayers([satellite, wms, vectors]);
-  map.addControl(new OpenLayers.Control.MousePosition());
-  map.addControl(new OpenLayers.Control.EditingToolbar(vectors));
-  map.setCenter(new OpenLayers.LonLat(-84.42,33.65), 11);
 
-  UpdateFormats()
+  map.setCenter(new OpenLayers.LonLat(-84.42,33.65), 10);
 }
 
 
-function UpdateFormats()
-{
-
-}
 
 function Input()
 {
@@ -77,9 +70,9 @@ function Input()
 
 function Deserialize()
 {
-  var element = "POLYGON((-84.445 33.7991, -84.445 33.7069,-84.331 33.7069,-84.331 33.7991,-84.445 33.7991))";
-  var features = formats['in']['wkt'].read(element);
-        alert("DHD");
+  var element = "POLYGON((-84.445 33.7991, -84.445 33.7069,-84.331 33.7069,-84.331 33.7991))";
+  var WKTParser = new OpenLayers.Format.WKT();
+  var features = WKTParser.read(element);
   var bounds;
   if(features)
   {
