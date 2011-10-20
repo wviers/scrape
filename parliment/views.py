@@ -41,7 +41,7 @@ def get_triples(request):
     return_list = []
     query = request.GET['query']
     request_strings = make_request(query)
-    
+   
     items = len(request_strings)
     iterations = 0
     while (iterations < items):

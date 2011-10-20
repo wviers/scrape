@@ -15,6 +15,8 @@ urlpatterns = patterns('',
     
     (r'^parliment/$', 'parliment.views.load_HTML'),
     
+    (r'^map/sparql/$', 'map.views.make_request'),
+    
     (r'^map/$', 'map.views.load_HTML'),
         
     # Examples:

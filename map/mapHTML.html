@@ -3,7 +3,9 @@
 <script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAjpkAC9ePGem0lIq5XcMiuhR_wWLPFku8Ix9i2SXYRVK3e45q1BQUd_beF8dtzKET_EteAjPdGDwqpQ'></script>
 <script src="http://openlayers.org/api/OpenLayers.js"></script>
 <script type = "text/javascript">
+
 var map, vectors, formats;
+
 function init()
 {
   map = new OpenLayers.Map('map');
@@ -30,7 +32,7 @@ function Input()
   var query;
   var xmlhttp;
 
-  query = 'PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> PREFIX geo-sf: <http://www.opengis.net/def/dataType/OGC-SF/1.0/> PREFIX gn: <http://www.geonames.org/ontology#> SELECT DISTINCT ?school WHERE { GRAPH <http://example.org/data> { LET (?place := "POLYGON((-84.445 33.7991, -84.445 33.7069,-84.331 33.7069,-84.331 33.7991,-84.445 33.7991))"^^geo-sf:WKTLiteral) . ?school a gn:Feature ; geo:hasGeometry ?school_geo ; gn:featureCode gn:S.SCH . ?sparta_geo a geo:Geometry ; geo:asWKT ?place . ?school_geo geo:sf-within ?sparta_geo . } }';
+  query = 'PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> PREFIX geo-sf: <http://www.opengis.net/def/dataType/OGC-SF/1.0/> PREFIX gn: <http://www.geonames.org/ontology#> SELECT DISTINCT ?school ?school_wkt WHERE { GRAPH <http://example.org/data> { LET (?place := "POLYGON((-84.445 33.7991, -84.445 33.7069,-84.331 33.7069,-84.331 33.7991,-84.445 33.7991))"^^geo-sf:WKTLiteral) . ?school a gn:Feature ; geo:hasGeometry ?school_geo ; gn:featureCode gn:S.SCH . ?atl_geo a geo:Geometry ; geo:asWKT ?place . ?school_geo geo:sf-within ?atl_geo .  ?school_geo geo:asWKT ?school_wkt . } }';
 
 
   if (window.XMLHttpRequest)
@@ -38,41 +40,59 @@ function Input()
 
     xmlhttp=new XMLHttpRequest();
   }
-  else
+
+  xmlhttp.onreadystatechange=function()
   {
-    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+    if(xmlhttp.readyState == 4)
+    {
+      var num;
+      var list = [];
+	  count = 1;
+	  list = JSON.parse(xmlhttp.responseText);
+	  alert(list);
+
+
+	  while((count - 1) < list.length)
+	  {
+	    num = list[count - 1].substring(24, 31);
+        theCoords = AddCoords(num);
+	    count++;
+      }
+    }
+  }
+  xmlhttp.open("GET","/map/sparql?query=" + encodeURIComponent(query),true);
+  xmlhttp.send();
+}
+
+
+function AddCoords(num)
+{
+  var xmlhttp;
+
+  if (window.XMLHttpRequest)
+  {
+    xmlhttp = new XMLHttpRequest();
   }
 
   xmlhttp.onreadystatechange=function()
   {
     if(xmlhttp.readyState == 4)
     {
-        var list = [];
-	    count = 1;
-	    list = JSON.parse(xmlhttp.responseText);
-
-	    while((count - 1) < list.length)
-	    {
-	      var num = list[count - 1].substring(24, 31);
-	      document.write('<li>');
-	      document.write('<a href="/parliment/coords/' + num + '/">');
-	      document.write(list[count - 1]);
-	      document.write('</a>');
-	      document.write('</li>');
-
-	      count++;
-        }
+      var coordinates;
+	  coordinates = JSON.parse(xmlhttp.responseText);
+	  DeserializePoint(coordinates);
     }
   }
-  xmlhttp.open("GET","/parliment/sparql?query=" + encodeURIComponent(query),true);
+  xmlhttp.open("GET","/parliment/coords/" + num + "/",true);
   xmlhttp.send();
+
 }
 
-function Deserialize()
+
+function DeserializePoint(num)
 {
-  var element = "POLYGON((-84.445 33.7991, -84.445 33.7069,-84.331 33.7069,-84.331 33.7991))";
   var WKTParser = new OpenLayers.Format.WKT();
-  var features = WKTParser.read(element);
+  var features = WKTParser.read(num);
   var bounds;
   if(features)
   {
@@ -89,7 +109,7 @@ function Deserialize()
 
     }
     vectors.addFeatures(features);
-    map.zoomToExtent(bounds);
+
     var plural = (features.length > 1) ? 's' : '';
     element.value = features.length + ' feature' + plural + ' added';
   }
@@ -104,7 +124,7 @@ function Deserialize()
 <body onload = "init()">
 
 <form>
-<input type="button" value="Send Query" onclick="Deserialize()" />
+<input type="button" value="Send Query" onclick="Input()" />
 </form>
 
 

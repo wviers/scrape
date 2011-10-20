@@ -5,7 +5,7 @@
 
 function Input()
 {
-  var query, query2;
+  var query;
   var xmlhttp;
 
   query = "PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> PREFIX gn: <http://www.geonames.org/ontology#> PREFIX gu: <http://cegis.usgs.gov/rdf/gu/featureID#> SELECT DISTINCT ?school WHERE { GRAPH <http://example.org/data> { gu:_1705317 geo:hasGeometry ?ga_geo . ?school a gn:Feature ; geo:hasGeometry ?school_geo ; gn:featureCode gn:S.SCH . ?school_geo geo:sf-within ?ga_geo . } }";
@@ -14,10 +14,6 @@ function Input()
   {
 
     xmlhttp=new XMLHttpRequest();
-  }
-  else
-  {
-    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
   }
 
   xmlhttp.onreadystatechange=function()
