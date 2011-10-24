@@ -40,9 +40,10 @@ def make_request(request):
     items = len(data2['results']['bindings'])
     iterations = 0
     while (iterations < items):
-        print data2['results']['bindings'][iterations]
-        return_list.append(data2['results']['bindings'][iterations])
+        return_list.append(data2['results']['bindings'][iterations]['school_wkt']['value'])
         iterations = iterations + 1
+    
+    print return_list
     
     return HttpResponse(json.dumps(return_list))
 

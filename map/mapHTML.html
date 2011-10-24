@@ -5,6 +5,8 @@
 <script type = "text/javascript">
 
 var map, vectors, formats;
+var lon = -84.41;
+var lat = 33.75;
 
 function init()
 {
@@ -20,9 +22,30 @@ function init()
                 {'reproject': true}
             );
 
-  map.addLayers([satellite, wms, vectors]);
+  var control = new OpenLayers.Control();
+  OpenLayers.Util.extend(control, {
+                    draw: function () {
+                        // this Handler.Box will intercept the shift-mousedown
+                        // before Control.MouseDefault gets to see it
+                        this.box = new OpenLayers.Handler.Box( control,
+                            {"done": this.notice},
+                            {keyMask: OpenLayers.Handler.MOD_SHIFT});
+                        this.box.activate();
+                    },
 
-  map.setCenter(new OpenLayers.LonLat(-84.42,33.65), 10);
+                    notice: function (bounds) {
+                        var ll = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.left, bounds.bottom));
+                        var ur = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.right, bounds.top));
+                        alert(ll.lon.toFixed(4) + ", " +
+                              ll.lat.toFixed(4) + ", " +
+                              ur.lon.toFixed(4) + ", " +
+                              ur.lat.toFixed(4));
+                               }
+                });
+
+  map.addLayers([satellite, wms, vectors]);
+  map.addControl(control);
+  map.setCenter(new OpenLayers.LonLat(-84.41,33.75),12);
 }
 
 
@@ -32,7 +55,7 @@ function Input()
   var query;
   var xmlhttp;
 
-  query = 'PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> PREFIX geo-sf: <http://www.opengis.net/def/dataType/OGC-SF/1.0/> PREFIX gn: <http://www.geonames.org/ontology#> SELECT DISTINCT ?school ?school_wkt WHERE { GRAPH <http://example.org/data> { LET (?place := "POLYGON((-84.445 33.7991, -84.445 33.7069,-84.331 33.7069,-84.331 33.7991,-84.445 33.7991))"^^geo-sf:WKTLiteral) . ?school a gn:Feature ; geo:hasGeometry ?school_geo ; gn:featureCode gn:S.SCH . ?atl_geo a geo:Geometry ; geo:asWKT ?place . ?school_geo geo:sf-within ?atl_geo .  ?school_geo geo:asWKT ?school_wkt . } }';
+  query = 'PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> PREFIX geo-sf: <http://www.opengis.net/def/dataType/OGC-SF/1.0/> PREFIX gn: <http://www.geonames.org/ontology#> SELECT DISTINCT ?school_wkt WHERE { GRAPH <http://example.org/data> { LET (?place := "POLYGON((-84.445 33.7991, -84.445 33.7069,-84.331 33.7069,-84.331 33.7991,-84.445 33.7991))"^^geo-sf:WKTLiteral) . ?school a gn:Feature ; geo:hasGeometry ?school_geo ; gn:featureCode gn:S.SCH . ?atl_geo a geo:Geometry ; geo:asWKT ?place . ?school_geo geo:sf-within ?atl_geo .  ?school_geo geo:asWKT ?school_wkt . } }';
 
 
   if (window.XMLHttpRequest)
@@ -49,14 +72,11 @@ function Input()
       var list = [];
 	  count = 1;
 	  list = JSON.parse(xmlhttp.responseText);
-	  alert(list);
-
 
 	  while((count - 1) < list.length)
 	  {
-	    num = list[count - 1].substring(24, 31);
-        theCoords = AddCoords(num);
-	    count++;
+        DeserializePoint(list[count - 1]);
+        count++;
       }
     }
   }
@@ -65,28 +85,6 @@ function Input()
 }
 
 
-function AddCoords(num)
-{
-  var xmlhttp;
-
-  if (window.XMLHttpRequest)
-  {
-    xmlhttp = new XMLHttpRequest();
-  }
-
-  xmlhttp.onreadystatechange=function()
-  {
-    if(xmlhttp.readyState == 4)
-    {
-      var coordinates;
-	  coordinates = JSON.parse(xmlhttp.responseText);
-	  DeserializePoint(coordinates);
-    }
-  }
-  xmlhttp.open("GET","/parliment/coords/" + num + "/",true);
-  xmlhttp.send();
-
-}
 
 
 function DeserializePoint(num)
@@ -94,6 +92,7 @@ function DeserializePoint(num)
   var WKTParser = new OpenLayers.Format.WKT();
   var features = WKTParser.read(num);
   var bounds;
+
   if(features)
   {
     if(features.constructor != Array)
@@ -109,12 +108,12 @@ function DeserializePoint(num)
 
     }
     vectors.addFeatures(features);
-
-    var plural = (features.length > 1) ? 's' : '';
-    element.value = features.length + ' feature' + plural + ' added';
   }
   else
     element.value = 'Bad input ' + type;
+
+
+
 
 }
 
@@ -127,6 +126,8 @@ function DeserializePoint(num)
 <input type="button" value="Send Query" onclick="Input()" />
 </form>
 
+<p> Press and hold the shift key, then click and drag the mouse to create a
+    rectangle that will be queryed for schools.  Stay within the Atlanta area.</p>
 
 <div id="map" class="smallmap"></div>
 
