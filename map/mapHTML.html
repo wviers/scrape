@@ -5,58 +5,73 @@
 <script type = "text/javascript">
 
 var map, vectors, formats;
-var lon = -84.41;
-var lat = 33.75;
+
 
 function init()
 {
-  map = new OpenLayers.Map('map');
+ var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
+        restrictedExtent = maxExtent.clone(),
+        maxResolution = 156543.0339;
 
-  var satellite = new OpenLayers.Layer.Google("Google Satellite" , {type: G_SATELLITE_MAP});
+    var options = {
+        projection: new OpenLayers.Projection("EPSG:900913"),
+        displayProjection: new OpenLayers.Projection("EPSG:4326"),
+        units: "m",
+        numZoomLevels: 18,
+        maxResolution: maxResolution,
+        maxExtent: maxExtent,
+        restrictedExtent: restrictedExtent
+    };
+
+  map = new OpenLayers.Map('map', options);
+
+  var satellite = new OpenLayers.Layer.Google("Google Satellite", {type: G_SATELLITE_MAP, sphericalMercator: true, numZoomLevels: 22});
+
   vectors = new OpenLayers.Layer.Vector("Vector Layer");
-  var wms = new OpenLayers.Layer.WMS("World Map","http://world.freemap.in/cgi-bin/mapserv",
-                {
-                    map: '/www/freemap.in/world/map/factbooktrans.map',
-                    layers: 'factbook'
-                },
-                {'reproject': true}
-            );
 
   var control = new OpenLayers.Control();
-  OpenLayers.Util.extend(control, {
-                    draw: function () {
+  OpenLayers.Util.extend(control, {draw: function () {
                         // this Handler.Box will intercept the shift-mousedown
                         // before Control.MouseDefault gets to see it
                         this.box = new OpenLayers.Handler.Box( control,
                             {"done": this.notice},
                             {keyMask: OpenLayers.Handler.MOD_SHIFT});
                         this.box.activate();
+
                     },
 
                     notice: function (bounds) {
                         var ll = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.left, bounds.bottom));
                         var ur = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.right, bounds.top));
-                        alert(ll.lon.toFixed(4) + ", " +
-                              ll.lat.toFixed(4) + ", " +
-                              ur.lon.toFixed(4) + ", " +
-                              ur.lat.toFixed(4));
+						var ul = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.left, bounds.top));
+						var lr = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.right, bounds.bottom));
+
+                        Input(ll.lon.toFixed(4), ll.lat.toFixed(4), ur.lon.toFixed(4),ur.lat.toFixed(4),
+                              ul.lon.toFixed(4), ul.lat.toFixed(4), lr.lon.toFixed(4),lr.lat.toFixed(4));
                                }
                 });
 
-  map.addLayers([satellite, wms, vectors]);
+  map.addControl(new OpenLayers.Control.EditingToolbar(vectors));
+  map.addControl(new OpenLayers.Control.Permalink());
+  map.addControl(new OpenLayers.Control.MousePosition());
+  map.addLayers([satellite, vectors]);
   map.addControl(control);
-  map.setCenter(new OpenLayers.LonLat(-84.41,33.75),12);
+
+  var proj = new OpenLayers.Projection("EPSG:4326");
+  var point = new OpenLayers.LonLat(-84.445, 33.7991);
+  map.setCenter(point.transform(proj, map.getProjectionObject()), 12);
 }
 
 
 
-function Input()
+function Input(bottomLeftLon, bottomLeftLat, topRightLon, topRightLat, topLeftLon, topLeftLat, bottomRightLon, bottomRightLat)
 {
   var query;
   var xmlhttp;
+  var lastLon = parseFloat(bottomLeftLon);
+  var lastLat = parseFloat(bottomLeftLat);
 
   query = 'PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> PREFIX geo-sf: <http://www.opengis.net/def/dataType/OGC-SF/1.0/> PREFIX gn: <http://www.geonames.org/ontology#> SELECT DISTINCT ?school_wkt WHERE { GRAPH <http://example.org/data> { LET (?place := "POLYGON((-84.445 33.7991, -84.445 33.7069,-84.331 33.7069,-84.331 33.7991,-84.445 33.7991))"^^geo-sf:WKTLiteral) . ?school a gn:Feature ; geo:hasGeometry ?school_geo ; gn:featureCode gn:S.SCH . ?atl_geo a geo:Geometry ; geo:asWKT ?place . ?school_geo geo:sf-within ?atl_geo .  ?school_geo geo:asWKT ?school_wkt . } }';
-
 
   if (window.XMLHttpRequest)
   {
@@ -86,11 +101,14 @@ function Input()
 
 
 
-
 function DeserializePoint(num)
 {
+
+  var proj = new OpenLayers.Projection("EPSG:900913");
   var WKTParser = new OpenLayers.Format.WKT();
-  var features = WKTParser.read(num);
+
+  var features = WKTParser.read(num).transform(proj, map.getProjectionObject());
+    alert("FDFD");
   var bounds;
 
   if(features)
@@ -127,7 +145,7 @@ function DeserializePoint(num)
 </form>
 
 <p> Press and hold the shift key, then click and drag the mouse to create a
-    rectangle that will be queryed for schools.  Stay within the Atlanta area.</p>
+    rectangle that will be queried for schools.  Stay within the Atlanta area.</p>
 
 <div id="map" class="smallmap"></div>
 
