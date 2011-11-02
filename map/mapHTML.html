@@ -46,13 +46,15 @@ function init()
 						var ul = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.left, bounds.top));
 						var lr = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.right, bounds.bottom));
 
-                        Input(ll.lon.toFixed(4), ll.lat.toFixed(4), ur.lon.toFixed(4),ur.lat.toFixed(4),
-                              ul.lon.toFixed(4), ul.lat.toFixed(4), lr.lon.toFixed(4),lr.lat.toFixed(4));
+                        Input(OpenLayers.Layer.SphericalMercator.inverseMercator(ll.lon.toFixed(4), ll.lat.toFixed(4)),
+                        OpenLayers.Layer.SphericalMercator.inverseMercator(ul.lon.toFixed(4), ul.lat.toFixed(4)),
+                        OpenLayers.Layer.SphericalMercator.inverseMercator(lr.lon.toFixed(4), lr.lat.toFixed(4)),
+                        OpenLayers.Layer.SphericalMercator.inverseMercator(ur.lon.toFixed(4), ur.lat.toFixed(4)));
                                }
                 });
 
   map.addControl(new OpenLayers.Control.EditingToolbar(vectors));
-  map.addControl(new OpenLayers.Control.Permalink());
+
   map.addControl(new OpenLayers.Control.MousePosition());
   map.addLayers([satellite, vectors]);
   map.addControl(control);
@@ -64,14 +66,12 @@ function init()
 
 
 
-function Input(bottomLeftLon, bottomLeftLat, topRightLon, topRightLat, topLeftLon, topLeftLat, bottomRightLon, bottomRightLat)
+function Input(bottomLeft, topRight, topLeft, bottomRight)
 {
   var query;
   var xmlhttp;
-  var lastLon = parseFloat(bottomLeftLon);
-  var lastLat = parseFloat(bottomLeftLat);
 
-  query = 'PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> PREFIX geo-sf: <http://www.opengis.net/def/dataType/OGC-SF/1.0/> PREFIX gn: <http://www.geonames.org/ontology#> SELECT DISTINCT ?school_wkt WHERE { GRAPH <http://example.org/data> { LET (?place := "POLYGON((-84.445 33.7991, -84.445 33.7069,-84.331 33.7069,-84.331 33.7991,-84.445 33.7991))"^^geo-sf:WKTLiteral) . ?school a gn:Feature ; geo:hasGeometry ?school_geo ; gn:featureCode gn:S.SCH . ?atl_geo a geo:Geometry ; geo:asWKT ?place . ?school_geo geo:sf-within ?atl_geo .  ?school_geo geo:asWKT ?school_wkt . } }';
+  query = 'PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> PREFIX geo-sf: <http://www.opengis.net/def/dataType/OGC-SF/1.0/> PREFIX gn: <http://www.geonames.org/ontology#> SELECT DISTINCT ?school_wkt WHERE { GRAPH <http://example.org/data> { LET (?place := "POLYGON((' + bottomLeft.lon + " " + bottomLeft.lat + ', ' + topLeft.lon  + " " + topLeft.lat + ', ' + bottomRight.lon + " " + bottomRight.lat + ', ' + topRight.lon + " " + topRight.lat + ", " + bottomLeft.lon + " " + bottomLeft.lat +'))"^^geo-sf:WKTLiteral) . ?school a gn:Feature ; geo:hasGeometry ?school_geo ; gn:featureCode gn:S.SCH . ?atl_geo a geo:Geometry ; geo:asWKT ?place . ?school_geo geo:sf-within ?atl_geo .  ?school_geo geo:asWKT ?school_wkt . } }';
 
   if (window.XMLHttpRequest)
   {
@@ -87,7 +87,6 @@ function Input(bottomLeftLon, bottomLeftLat, topRightLon, topRightLat, topLeftLo
       var list = [];
 	  count = 1;
 	  list = JSON.parse(xmlhttp.responseText);
-
 	  while((count - 1) < list.length)
 	  {
         DeserializePoint(list[count - 1]);
@@ -103,13 +102,16 @@ function Input(bottomLeftLon, bottomLeftLat, topRightLon, topRightLat, topLeftLo
 
 function DeserializePoint(num)
 {
-
-  var proj = new OpenLayers.Projection("EPSG:900913");
-  var WKTParser = new OpenLayers.Format.WKT();
-
-  var features = WKTParser.read(num).transform(proj, map.getProjectionObject());
-    alert("FDFD");
+  var coord;
   var bounds;
+
+  coord = new OpenLayers.Geometry.Point(parseFloat(num.substring(6, 14)), parseFloat(num.substring(16, 23)));
+
+  var latLon = new OpenLayers.Projection("EPSG:4326");
+  var mercator = new OpenLayers.Projection("EPSG:900913");
+  coord = coord.transform(latLon, mercator);
+
+  var features = new OpenLayers.Feature.Vector(coord);
 
   if(features)
   {
@@ -138,12 +140,7 @@ function DeserializePoint(num)
 
 </script>
 </head>
-<body onload = "init()">
-
-<form>
-<input type="button" value="Send Query" onclick="Input()" />
-</form>
-
+<body onload = "init()"
 <p> Press and hold the shift key, then click and drag the mouse to create a
     rectangle that will be queried for schools.  Stay within the Atlanta area.</p>
 
