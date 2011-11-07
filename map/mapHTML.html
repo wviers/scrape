@@ -4,12 +4,45 @@
 <script src="http://openlayers.org/api/OpenLayers.js"></script>
 <script type = "text/javascript">
 
-var map, vectors, formats;
+var map, vectors, formats, drawControls, selectControl, selectedFeature;
+
+function onFeatureUnselect(feature)
+{
+  map.removePopup(feature.popup);
+  feature.popup.destroy();
+  feature.popup = null;
+}
+
+
+function onFeatureSelect(feature)
+{
+  selectedFeature = feature;
+  var newFeature = feature;
+
+  var proj = new OpenLayers.Projection("EPSG:4326");
+  var mercator = new OpenLayers.Projection("EPSG:900913");
+  newFeature.geometry.transform(mercator, proj);
+
+  popup = new OpenLayers.Popup.FramedCloud("popup", feature.geometry.getBounds().getCenterLonLat(),
+                        null,
+                        "<div style='font-size:.8em'>Point: " + feature.geometry.x+"</div>",
+                        null, true, onPopupClose);
+  feature.popup = popup;
+  map.addPopup(popup);
+}
+
+
+function onPopupClose(evt)
+{
+  selectControl.unselect(selectedFeature);
+
+}
+
 
 
 function init()
 {
- var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
+  var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
         restrictedExtent = maxExtent.clone(),
         maxResolution = 156543.0339;
 
@@ -53,15 +86,60 @@ function init()
                                }
                 });
 
-  map.addControl(new OpenLayers.Control.EditingToolbar(vectors));
 
   map.addControl(new OpenLayers.Control.MousePosition());
   map.addLayers([satellite, vectors]);
   map.addControl(control);
 
+  selectControl = new OpenLayers.Control.SelectFeature(vectors, {onSelect: onFeatureSelect, onUnselect: onFeatureUnselect});
+              drawControls = {polygon: new OpenLayers.Control.DrawFeature(vectors, OpenLayers.Handler.Point),
+                  select: selectControl};
+
+  for(var key in drawControls)
+  {
+    map.addControl(drawControls[key]);
+  }
+
   var proj = new OpenLayers.Projection("EPSG:4326");
+  var mercator = new OpenLayers.Projection("EPSG:900913");
   var point = new OpenLayers.LonLat(-84.445, 33.7991);
-  map.setCenter(point.transform(proj, map.getProjectionObject()), 12);
+  map.setCenter(point.transform(proj, mercator), 12);
+}
+
+
+
+function getName(lonLat, feature)
+{
+  var query;
+  var xmlhttp;
+  //convert the lonlat into wkt here or in the query itself
+
+  //change this to a query that gets the name
+  query = 'PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> PREFIX geo-sf: <http://www.opengis.net/def/dataType/OGC-SF/1.0/> PREFIX gn: <http://www.geonames.org/ontology#> SELECT DISTINCT ?school_wkt WHERE { GRAPH <http://example.org/data> { LET (?place := "POLYGON((' + bottomLeft.lon + " " + bottomLeft.lat + ', ' + topLeft.lon  + " " + topLeft.lat + ', ' + bottomRight.lon + " " + bottomRight.lat + ', ' + topRight.lon + " " + topRight.lat + ", " + bottomLeft.lon + " " + bottomLeft.lat +'))"^^geo-sf:WKTLiteral) . ?school a gn:Feature ; geo:hasGeometry ?school_geo ; gn:featureCode gn:S.SCH . ?atl_geo a geo:Geometry ; geo:asWKT ?place . ?school_geo geo:sf-within ?atl_geo .  ?school_geo geo:asWKT ?school_wkt . } }';
+
+  if (window.XMLHttpRequest)
+  {
+
+    xmlhttp=new XMLHttpRequest();
+  }
+
+  xmlhttp.onreadystatechange=function()
+  {
+    if(xmlhttp.readyState == 4)
+    {
+      var list = [];
+
+	  list = JSON.parse(xmlhttp.responseText);
+	  popup = new OpenLayers.Popup.FramedCloud("popup", feature.geometry.getBounds().getCenterLonLat(),
+	                          null,
+	                          "<div style='font-size:.8em'>SchoolName: " + list[0] + " <br> Coordinates: " + feature.geometry.getBounds().getCenterLonLat() + "</div>",
+	                          true, onPopupClose);
+	  feature.popup = popup;
+      map.addPopup(popup);
+    }
+  }
+  xmlhttp.open("GET","/map/sparql?query=" + encodeURIComponent(query),true);
+  xmlhttp.send();
 }
 
 
@@ -132,11 +210,24 @@ function DeserializePoint(num)
   else
     element.value = 'Bad input ' + type;
 
-
-
-
 }
 
+
+function toggleControl(element)
+{
+  for(key in drawControls)
+  {
+    var control = drawControls[key];
+    if(element.value == key && element.checked)
+    {
+      control.activate();
+    }
+    else
+    {
+      control.deactivate();
+    }
+  }
+}
 
 </script>
 </head>
@@ -145,7 +236,24 @@ function DeserializePoint(num)
     rectangle that will be queried for schools.  Stay within the Atlanta area.</p>
 
 <div id="map" class="smallmap"></div>
+<ul id="controlToggle">
+        <li>
+            <input type="radio" name="type" value="none" id="noneToggle"
+                   onclick="toggleControl(this);" checked="checked" />
+            <label for="noneToggle">navigate</label>
+        </li>
+        <li>
 
+            <input type="radio" name="type" value="polygon" id="polygonToggle"
+                   onclick="toggleControl(this);" />
+            <label for="polygonToggle">draw polygon</label>
+        </li>
+        <li>
+            <input type="radio" name="type" value="select" id="selectToggle"
+                   onclick="toggleControl(this);" />
+            <label for="selectToggle">select polygon on click</label>
+        </li>
+    </ul>
 </body>
 </html>
 
