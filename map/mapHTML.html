@@ -2,6 +2,19 @@
 <head>
 <script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAjpkAC9ePGem0lIq5XcMiuhR_wWLPFku8Ix9i2SXYRVK3e45q1BQUd_beF8dtzKET_EteAjPdGDwqpQ'></script>
 <script src="http://openlayers.org/api/OpenLayers.js"></script>
+<style type="text/css">
+.smallmap {
+    height: 256px;
+    width: 512px;
+}
+.bigmap {
+	height: 512px;
+	width: 1024px;
+}
+li{
+	list-style: none;
+	}
+</style>
 <script type = "text/javascript">
 
 var map, vectors, formats, drawControls, selectControl, selectedFeature;
@@ -17,16 +30,15 @@ function onFeatureUnselect(feature)
 function onFeatureSelect(feature)
 {
   selectedFeature = feature;
-  var newFeature = feature;
 
   var proj = new OpenLayers.Projection("EPSG:4326");
   var mercator = new OpenLayers.Projection("EPSG:900913");
-  newFeature.geometry.transform(mercator, proj);
 
   popup = new OpenLayers.Popup.FramedCloud("popup", feature.geometry.getBounds().getCenterLonLat(),
                         null,
-                        "<div style='font-size:.8em'>Point: " + feature.geometry.x+"</div>",
+                        "<div style='font-size:.8em'>Point: " + feature.geometry.transform(mercator, proj).x + ", " + feature.geometry.y +"</div>",
                         null, true, onPopupClose);
+  feature.geometry.transform(proj, mercator);
   feature.popup = popup;
   map.addPopup(popup);
 }
@@ -35,7 +47,6 @@ function onFeatureSelect(feature)
 function onPopupClose(evt)
 {
   selectControl.unselect(selectedFeature);
-
 }
 
 
@@ -59,7 +70,8 @@ function init()
   map = new OpenLayers.Map('map', options);
 
   var satellite = new OpenLayers.Layer.Google("Google Satellite", {type: G_SATELLITE_MAP, sphericalMercator: true, numZoomLevels: 22});
-
+//  var nationalMap = new OpenLayers.Layer.WMS("NationalMap", "http://frameworkwfs.usgs.gov/framework/wms/wms.cgi?", {layers: "ROADS:Framework"})
+  var Georgia = new OpenLayers.Layer.WMS("Georgia", "http://imsortho.cr.usgs.gov:80/wmsconnector/com.esri.wms.Esrimap/USGS_EDC_Ortho_Georgia?", {layers: "USGS_EDC_Ortho_Georgia"})
   vectors = new OpenLayers.Layer.Vector("Vector Layer");
 
   var control = new OpenLayers.Control();
@@ -88,7 +100,7 @@ function init()
 
 
   map.addControl(new OpenLayers.Control.MousePosition());
-  map.addLayers([satellite, vectors]);
+  map.addLayers([Georgia, vectors]);
   map.addControl(control);
 
   selectControl = new OpenLayers.Control.SelectFeature(vectors, {onSelect: onFeatureSelect, onUnselect: onFeatureUnselect});
@@ -235,23 +247,23 @@ function toggleControl(element)
 <p> Press and hold the shift key, then click and drag the mouse to create a
     rectangle that will be queried for schools.  Stay within the Atlanta area.</p>
 
-<div id="map" class="smallmap"></div>
+<div id="map" class="bigmap"></div>
 <ul id="controlToggle">
         <li>
             <input type="radio" name="type" value="none" id="noneToggle"
                    onclick="toggleControl(this);" checked="checked" />
-            <label for="noneToggle">navigate</label>
+            <label for="noneToggle">Navigate</label>
         </li>
         <li>
 
             <input type="radio" name="type" value="polygon" id="polygonToggle"
                    onclick="toggleControl(this);" />
-            <label for="polygonToggle">draw polygon</label>
+            <label for="polygonToggle">Draw Points</label>
         </li>
         <li>
             <input type="radio" name="type" value="select" id="selectToggle"
                    onclick="toggleControl(this);" />
-            <label for="selectToggle">select polygon on click</label>
+            <label for="selectToggle">Select Point on Click</label>
         </li>
     </ul>
 </body>
