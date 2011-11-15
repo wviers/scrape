@@ -1,6 +1,5 @@
 <html>
 <head>
-<script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAjpkAC9ePGem0lIq5XcMiuhR_wWLPFku8Ix9i2SXYRVK3e45q1BQUd_beF8dtzKET_EteAjPdGDwqpQ'></script>
 <script src="http://openlayers.org/api/OpenLayers.js"></script>
 <style type="text/css">
 .smallmap {
@@ -69,9 +68,9 @@ function init()
 
   map = new OpenLayers.Map('map', options);
 
-  var satellite = new OpenLayers.Layer.Google("Google Satellite", {type: G_SATELLITE_MAP, sphericalMercator: true, numZoomLevels: 22});
-//  var nationalMap = new OpenLayers.Layer.WMS("NationalMap", "http://frameworkwfs.usgs.gov/framework/wms/wms.cgi?", {layers: "ROADS:Framework"})
-  var Georgia = new OpenLayers.Layer.WMS("Georgia", "http://imsortho.cr.usgs.gov:80/wmsconnector/com.esri.wms.Esrimap/USGS_EDC_Ortho_Georgia?", {layers: "USGS_EDC_Ortho_Georgia"})
+  var nationalMapWMS = new OpenLayers.Layer.WMS("NationalMap", "http://raster.nationalmap.gov/arcgis/services/Combined/TNM_Large_Scale_Imagery/MapServer/WMSServer", {layers: "0"})
+
+
   vectors = new OpenLayers.Layer.Vector("Vector Layer");
 
   var control = new OpenLayers.Control();
@@ -100,7 +99,7 @@ function init()
 
 
   map.addControl(new OpenLayers.Control.MousePosition());
-  map.addLayers([Georgia, vectors]);
+  map.addLayers([nationalMapWMS, vectors]);
   map.addControl(control);
 
   selectControl = new OpenLayers.Control.SelectFeature(vectors, {onSelect: onFeatureSelect, onUnselect: onFeatureUnselect});
@@ -266,6 +265,9 @@ function toggleControl(element)
             <label for="selectToggle">Select Point on Click</label>
         </li>
     </ul>
+
+<p>Information on features made by the queries can be brought up by clicking the select points radio button and
+   then clicking a point on the map. </p>
 </body>
 </html>
 
