@@ -36,16 +36,17 @@ def make_request(request):
 			
 
     conn.close
-
     items = len(data2['results']['bindings'])
     iterations = 0
     while (iterations < items):
         return_list.append(data2['results']['bindings'][iterations]['school_wkt']['value'])
+        return_list.append(data2['results']['bindings'][iterations]['school_name']['value'])
         iterations = iterations + 1
     
-    print return_list
-    
+    print return_list    
     return HttpResponse(json.dumps(return_list))
+
+
 
 
 def load_HTML(request):

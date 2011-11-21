@@ -2,10 +2,6 @@
 <head>
 <script src="http://openlayers.org/api/OpenLayers.js"></script>
 <style type="text/css">
-.smallmap {
-    height: 256px;
-    width: 512px;
-}
 .bigmap {
 	height: 512px;
 	width: 1024px;
@@ -18,6 +14,7 @@ li{
 
 var map, vectors, formats, drawControls, selectControl, selectedFeature;
 
+
 function onFeatureUnselect(feature)
 {
   map.removePopup(feature.popup);
@@ -29,13 +26,12 @@ function onFeatureUnselect(feature)
 function onFeatureSelect(feature)
 {
   selectedFeature = feature;
-
   var proj = new OpenLayers.Projection("EPSG:4326");
   var mercator = new OpenLayers.Projection("EPSG:900913");
 
   popup = new OpenLayers.Popup.FramedCloud("popup", feature.geometry.getBounds().getCenterLonLat(),
                         null,
-                        "<div style='font-size:.8em'>Point: " + feature.geometry.transform(mercator, proj).x + ", " + feature.geometry.y +"</div>",
+                        "<div style='font-size:.8em'>Point: " + feature.geometry.transform(mercator, proj).x + ", " + feature.geometry.y + " Name: " + feature.id +"</div>",
                         null, true, onPopupClose);
   feature.geometry.transform(proj, mercator);
   feature.popup = popup;
@@ -52,11 +48,14 @@ function onPopupClose(evt)
 
 function init()
 {
-  var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
+
+var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
         restrictedExtent = maxExtent.clone(),
         maxResolution = 156543.0339;
 
-    var options = {
+
+
+  var options = {
         projection: new OpenLayers.Projection("EPSG:900913"),
         displayProjection: new OpenLayers.Projection("EPSG:4326"),
         units: "m",
@@ -68,7 +67,7 @@ function init()
 
   map = new OpenLayers.Map('map', options);
 
-  var nationalMapWMS = new OpenLayers.Layer.WMS("NationalMap", "http://raster.nationalmap.gov/arcgis/services/Combined/TNM_Large_Scale_Imagery/MapServer/WMSServer", {layers: "0"})
+  var nationalMapWMS = new OpenLayers.Layer.WMS("NationalMapLarge", "http://raster.nationalmap.gov/arcgis/services/Combined/TNM_Large_Scale_Imagery/MapServer/WMSServer", {layers: "0"});
 
 
   vectors = new OpenLayers.Layer.Vector("Vector Layer");
@@ -100,6 +99,7 @@ function init()
 
   map.addControl(new OpenLayers.Control.MousePosition());
   map.addLayers([nationalMapWMS, vectors]);
+  map.addControl(new OpenLayers.Control.LayerSwitcher());
   map.addControl(control);
 
   selectControl = new OpenLayers.Control.SelectFeature(vectors, {onSelect: onFeatureSelect, onUnselect: onFeatureUnselect});
@@ -119,53 +119,20 @@ function init()
 
 
 
-function getName(lonLat, feature)
-{
-  var query;
-  var xmlhttp;
-  //convert the lonlat into wkt here or in the query itself
-
-  //change this to a query that gets the name
-  query = 'PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> PREFIX geo-sf: <http://www.opengis.net/def/dataType/OGC-SF/1.0/> PREFIX gn: <http://www.geonames.org/ontology#> SELECT DISTINCT ?school_wkt WHERE { GRAPH <http://example.org/data> { LET (?place := "POLYGON((' + bottomLeft.lon + " " + bottomLeft.lat + ', ' + topLeft.lon  + " " + topLeft.lat + ', ' + bottomRight.lon + " " + bottomRight.lat + ', ' + topRight.lon + " " + topRight.lat + ", " + bottomLeft.lon + " " + bottomLeft.lat +'))"^^geo-sf:WKTLiteral) . ?school a gn:Feature ; geo:hasGeometry ?school_geo ; gn:featureCode gn:S.SCH . ?atl_geo a geo:Geometry ; geo:asWKT ?place . ?school_geo geo:sf-within ?atl_geo .  ?school_geo geo:asWKT ?school_wkt . } }';
-
-  if (window.XMLHttpRequest)
-  {
-
-    xmlhttp=new XMLHttpRequest();
-  }
-
-  xmlhttp.onreadystatechange=function()
-  {
-    if(xmlhttp.readyState == 4)
-    {
-      var list = [];
-
-	  list = JSON.parse(xmlhttp.responseText);
-	  popup = new OpenLayers.Popup.FramedCloud("popup", feature.geometry.getBounds().getCenterLonLat(),
-	                          null,
-	                          "<div style='font-size:.8em'>SchoolName: " + list[0] + " <br> Coordinates: " + feature.geometry.getBounds().getCenterLonLat() + "</div>",
-	                          true, onPopupClose);
-	  feature.popup = popup;
-      map.addPopup(popup);
-    }
-  }
-  xmlhttp.open("GET","/map/sparql?query=" + encodeURIComponent(query),true);
-  xmlhttp.send();
-}
-
-
-
 function Input(bottomLeft, topRight, topLeft, bottomRight)
 {
   var query;
   var xmlhttp;
 
-  query = 'PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> PREFIX geo-sf: <http://www.opengis.net/def/dataType/OGC-SF/1.0/> PREFIX gn: <http://www.geonames.org/ontology#> SELECT DISTINCT ?school_wkt WHERE { GRAPH <http://example.org/data> { LET (?place := "POLYGON((' + bottomLeft.lon + " " + bottomLeft.lat + ', ' + topLeft.lon  + " " + topLeft.lat + ', ' + bottomRight.lon + " " + bottomRight.lat + ', ' + topRight.lon + " " + topRight.lat + ", " + bottomLeft.lon + " " + bottomLeft.lat +'))"^^geo-sf:WKTLiteral) . ?school a gn:Feature ; geo:hasGeometry ?school_geo ; gn:featureCode gn:S.SCH . ?atl_geo a geo:Geometry ; geo:asWKT ?place . ?school_geo geo:sf-within ?atl_geo .  ?school_geo geo:asWKT ?school_wkt . } }';
+  query = 'PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> PREFIX geo-sf: <http://www.opengis.net/def/dataType/OGC-SF/1.0/> PREFIX gn: <http://www.geonames.org/ontology#> SELECT DISTINCT ?school_name ?school_wkt WHERE { GRAPH <http://example.org/data> { LET (?place := "POLYGON((' + bottomLeft.lon + " " + bottomLeft.lat + ', ' + topLeft.lon  + " " + topLeft.lat + ', ' + bottomRight.lon + " " + bottomRight.lat + ', ' + topRight.lon + " " + topRight.lat + ", " + bottomLeft.lon + " " + bottomLeft.lat +'))"^^geo-sf:WKTLiteral) . ?school a gn:Feature ; geo:hasGeometry ?school_geo ; gn:featureCode gn:S.SCH . ?atl_geo a geo:Geometry ; geo:asWKT ?place . ?school_geo geo:sf-within ?atl_geo .  ?school_geo geo:asWKT ?school_wkt . ?school gn:name ?school_name. } }';
 
   if (window.XMLHttpRequest)
   {
-
-    xmlhttp=new XMLHttpRequest();
+    xmlhttp = new XMLHttpRequest();
+  }
+  else
+  {
+    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
   }
 
   xmlhttp.onreadystatechange=function()
@@ -175,11 +142,12 @@ function Input(bottomLeft, topRight, topLeft, bottomRight)
       var num;
       var list = [];
 	  count = 1;
+	  list = xmlhttp.responseText;
 	  list = JSON.parse(xmlhttp.responseText);
 	  while((count - 1) < list.length)
 	  {
-        DeserializePoint(list[count - 1]);
-        count++;
+        DeserializePoint(list[count - 1], list[count]);
+        count+= 2;
       }
     }
   }
@@ -189,7 +157,7 @@ function Input(bottomLeft, topRight, topLeft, bottomRight)
 
 
 
-function DeserializePoint(num)
+function DeserializePoint(num, featureId)
 {
   var coord;
   var bounds;
@@ -201,6 +169,7 @@ function DeserializePoint(num)
   coord = coord.transform(latLon, mercator);
 
   var features = new OpenLayers.Feature.Vector(coord);
+  features.id = featureId;
 
   if(features)
   {
