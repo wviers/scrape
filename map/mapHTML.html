@@ -177,7 +177,7 @@ var resolutions = [];
                 projection: 'EPSG:' + layerInfo.spatialReference.wkid
             });
 
-  var cacheLayer = new OpenLayers.Layer.ArcGIS93Rest( "AGSCache",
+  var SmallScale = new OpenLayers.Layer.ArcGIS93Rest( "SmallScale",
 			                    "http://raster1.nationalmap.gov/ArcGIS/rest/services/TNM_Small_Scale_Imagery/MapServer?f=json&pretty=true", {
 			                        isBaseLayer: true,
 
@@ -237,12 +237,12 @@ var resolutions = [];
   var proj = new OpenLayers.Projection("EPSG:4326");
   var mercator = new OpenLayers.Projection("EPSG:900913");
   var point = new OpenLayers.LonLat(-84.445, 33.7991);
-  map.setCenter(point.transform(proj, mercator), 12);
+  map.setCenter(point.transform(proj, mercator), 14);
 }
 
 
 
-function Input(bottomLeft, topRight, topLeft, bottomRight)
+function Input(bottomLeft, topLeft, bottomRight, topRight)
 {
   var query;
   var xmlhttp;
@@ -274,11 +274,9 @@ function Input(bottomLeft, topRight, topLeft, bottomRight)
       }
     }
   }
-  xmlhttp.open("GET","/map/sparql?query=" + encodeURIComponent(query),true);
+  xmlhttp.open("GET","/map/sparql/" + (Math.round(topRight.lon * 10000) / 10000) + "/" + (Math.round(topRight.lat * 10000) / 10000) + "/" + (Math.round(bottomRight.lon * 10000) / 10000) + "/" + (Math.round(bottomRight.lat * 10000) / 10000) + "/" + (Math.round(bottomLeft.lon * 10000) / 10000) + "/" + (Math.round(bottomLeft.lat * 10000) / 10000) + "/" + (Math.round(topLeft.lon * 10000) / 10000) + "/" + (Math.round(topLeft.lat * 10000) / 10000) + "/", true);
   xmlhttp.send();
 }
-
-
 
 function DeserializePoint(num, featureId)
 {

@@ -1,9 +1,5 @@
 from django.conf.urls.defaults import *
 
-# Uncomment the next two lines to enable the admin:
-#from django.contrib import admin
-#admin.autodiscover()
-
 urlpatterns = patterns('',
     (r'^tweets/(?P<twitter_name>\w+)/(?P<count>\d+)/$', 'tweet.views.tweet_view'),
     
@@ -15,17 +11,9 @@ urlpatterns = patterns('',
     
     (r'^parliment/$', 'parliment.views.load_HTML'),
     
-    (r'^map/sparql/$', 'map.views.make_request'),
+    (r'^map/sparql/(?P<TRLo>-?\d+\.\d{4})/(?P<TRLa>-?\d+\.\d{4})/(?P<BRLo>-?\d+\.\d{4})/(?P<BRLa>-?\d+\.\d{4})/(?P<BLLo>-?\d+\.\d{4})/(?P<BLLa>-?\d+\.\d{4})/(?P<TLLo>-?\d+\.\d{4})/(?P<TLLa>-?\d+\.\d{4})/$', 'map.views.make_request'),
     
     (r'^map/$', 'map.views.load_HTML'),
         
-    # Examples:
-    # url(r'^$', 'scrape.views.home', name='home'),
-    # url(r'^scrape/', include('scrape.foo.urls')),
-
-    # Uncomment the admin/doc line below to enable admin documentation:
-    #url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
-    #url(r'^admin/', include(admin.site.urls)),    
+   
 )

@@ -10,11 +10,13 @@ import urllib
 from string import Template
 
 
-def make_request(request):
+def make_request(request, TRLo, TRLa, BRLo, BRLa, BLLo, BLLa, TLLo, TLLa):
     response = []
     return_list = []
-    query = request.GET['query']
+    
+    query = 'PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> PREFIX geo-sf: <http://www.opengis.net/def/dataType/OGC-SF/1.0/> PREFIX gn: <http://www.geonames.org/ontology#> SELECT DISTINCT ?school_name ?school_wkt WHERE { GRAPH <http://example.org/data> { LET (?place := "POLYGON((' + TRLo + " " + TRLa + ', ' + BRLo  + " " + BRLa + ', ' + BLLo + " " + BLLa + ', ' + TLLo + " " + TLLa + ", " + TRLo + " " + TRLa +'))"^^geo-sf:WKTLiteral) . ?school a gn:Feature ; geo:hasGeometry ?school_geo ; gn:featureCode gn:S.SCH . ?atl_geo a geo:Geometry ; geo:asWKT ?place . ?school_geo geo:sf-within ?atl_geo .  ?school_geo geo:asWKT ?school_wkt . ?school gn:name ?school_name. } }';
 
+    print query
     params = urllib.urlencode({'query':query, 'output':'json'})
     headers = {"Content-type": "application/x-www-form-urlencoded",
     "Accept": "text/plain"}
@@ -36,6 +38,8 @@ def make_request(request):
 			
 
     conn.close
+    
+    print data2
     items = len(data2['results']['bindings'])
     iterations = 0
     while (iterations < items):
