@@ -14,89 +14,6 @@ li{
 
 var map, vectors, formats, drawControls, selectControl, selectedFeature;
 
-layerInfo = {
-  "serviceDescription" : "",
-  "mapName" : "Layers",
-  "description" : "",
-  "copyrightText" : "",
-  "layers" : [
-    {
-      "id" : 0,
-      "name" : "BMNG",
-      "parentLayerId" : -1,
-      "defaultVisibility" : false,
-      "subLayerIds" : null
-    },
-    {
-      "id" : 1,
-      "name" : "GLS2000_NA",
-      "parentLayerId" : -1,
-      "defaultVisibility" : false,
-      "subLayerIds" : null
-    }
-  ],
-  "spatialReference" : {
-    "wkid" : 102113
-  },
-  "singleFusedMapCache" : true,
-  "tileInfo" : {
-    "rows" : 256,
-    "cols" : 256,
-    "dpi" : 96,
-    "format" : "JPEG",
-    "compressionQuality" : 75,
-    "origin" : {
-      "x" : -20037508.342787,
-      "y" : 20037508.342787
-    },
-    "spatialReference" : {
-      "wkid" : 102113
-    },
-    "lods" : [
-      {"level" : 0, "resolution" : 156543.033928, "scale" : 591657527.591555},
-      {"level" : 1, "resolution" : 78271.5169639999, "scale" : 295828763.795777},
-      {"level" : 2, "resolution" : 39135.7584820001, "scale" : 147914381.897889},
-      {"level" : 3, "resolution" : 19567.8792409999, "scale" : 73957190.948944},
-      {"level" : 4, "resolution" : 9783.93962049996, "scale" : 36978595.474472},
-      {"level" : 5, "resolution" : 4891.96981024998, "scale" : 18489297.737236},
-      {"level" : 6, "resolution" : 2445.98490512499, "scale" : 9244648.868618},
-      {"level" : 7, "resolution" : 1222.99245256249, "scale" : 4622324.434309},
-      {"level" : 8, "resolution" : 611.49622628138, "scale" : 2311162.217155},
-      {"level" : 9, "resolution" : 305.748113140558, "scale" : 1155581.108577},
-      {"level" : 10, "resolution" : 152.874056570411, "scale" : 577790.554289},
-      {"level" : 11, "resolution" : 76.4370282850732, "scale" : 288895.277144}
-    ]
-  },
-  "initialExtent" : {
-    "xmin" : -52103122.1120746,
-    "ymin" : -33264797.0284673,
-    "xmax" : 52103042.013375,
-    "ymax" : 33264676.0354959,
-    "spatialReference" : {
-      "wkid" : 102113
-    }
-  },
-  "fullExtent" : {
-    "xmin" : -22041078.8288484,
-    "ymin" : -33264797.0284673,
-    "xmax" : 22040998.7301488,
-    "ymax" : 33264676.0354959,
-    "spatialReference" : {
-      "wkid" : 102113
-    }
-  },
-  "units" : "esriMeters",
-  "supportedImageFormatTypes" : "PNG24,PNG,JPG,DIB,TIFF,EMF,PS,PDF,GIF,SVG,SVGZ,AI",
-  "documentInfo" : {
-    "Title" : "TNM Small Scale Imagery",
-    "Author" : "",
-    "Comments" : "See http://viewer.nationalmap.gov/help for assistance with TNM services or metadata.",
-    "Subject" : "",
-    "Category" : "",
-    "Keywords" : ""
-  }
-}
-
 
 
 function onFeatureUnselect(feature)
@@ -138,21 +55,6 @@ var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
         maxResolution = 156543.0339;
 
 
-/*
-var layerMaxExtent = new OpenLayers.Bounds(
-                layerInfo.fullExtent.xmin,
-                layerInfo.fullExtent.ymin,
-                layerInfo.fullExtent.xmax,
-                layerInfo.fullExtent.ymax
-            );
-
-
-var resolutions = [];
-            for (var i=0; i<layerInfo.tileInfo.lods.length; i++) {
-                resolutions.push(layerInfo.tileInfo.lods[i].resolution);
-            }
-*/
-
 
  var options = {
         projection: new OpenLayers.Projection("EPSG:900913"),
@@ -167,28 +69,8 @@ var resolutions = [];
   map = new OpenLayers.Map('map', options);
 
 
-/*
- map = new OpenLayers.Map('map', {
-                maxExtent: maxExtent,
-                StartBounds: layerMaxExtent,
-                units: (layerInfo.units == "esriFeet") ? 'ft' : 'm',
-                resolutions: resolutions,
-                tileSize: new OpenLayers.Size(256, 256),
-                projection: 'EPSG:' + layerInfo.spatialReference.wkid
-            });
+ var SmallScale = new OpenLayers.Layer.ArcGIS93Rest( "SmallScale","http://raster1.nationalmap.gov/ArcGIS/rest/services/TNM_Small_Scale_Imagery/MapServer/export", {});
 
-  var SmallScale = new OpenLayers.Layer.ArcGIS93Rest( "SmallScale",
-			                    "http://raster1.nationalmap.gov/ArcGIS/rest/services/TNM_Small_Scale_Imagery/MapServer?f=json&pretty=true", {
-			                        isBaseLayer: true,
-
-			                        //From layerInfo above
-			                        resolutions: resolutions,
-			                        tileSize: new OpenLayers.Size(256, 256),
-			                        tileOrigin: new OpenLayers.LonLat(layerInfo.tileInfo.origin.x , layerInfo.tileInfo.origin.y),
-			                        maxExtent: layerMaxExtent,
-			                        projection: 'EPSG:' + layerInfo.spatialReference.wkid
-                    });
-*/
 
 
   var nationalMapWMS = new OpenLayers.Layer.WMS("NationalMapLarge", "http://raster.nationalmap.gov/arcgis/services/Combined/TNM_Large_Scale_Imagery/MapServer/WMSServer", {layers: "0"});
@@ -221,7 +103,7 @@ var resolutions = [];
                 });
 
   map.addControl(new OpenLayers.Control.MousePosition());
-  map.addLayers([vectors, nationalMapWMS]);
+  map.addLayers([vectors, nationalMapWMS, SmallScale]);
   map.addControl(new OpenLayers.Control.LayerSwitcher());
   map.addControl(control);
 
@@ -244,10 +126,7 @@ var resolutions = [];
 
 function Input(bottomLeft, topLeft, bottomRight, topRight)
 {
-  var query;
   var xmlhttp;
-
-  query = 'PREFIX geo: <http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/> PREFIX geo-sf: <http://www.opengis.net/def/dataType/OGC-SF/1.0/> PREFIX gn: <http://www.geonames.org/ontology#> SELECT DISTINCT ?school_name ?school_wkt WHERE { GRAPH <http://example.org/data> { LET (?place := "POLYGON((' + bottomLeft.lon + " " + bottomLeft.lat + ', ' + topLeft.lon  + " " + topLeft.lat + ', ' + bottomRight.lon + " " + bottomRight.lat + ', ' + topRight.lon + " " + topRight.lat + ", " + bottomLeft.lon + " " + bottomLeft.lat +'))"^^geo-sf:WKTLiteral) . ?school a gn:Feature ; geo:hasGeometry ?school_geo ; gn:featureCode gn:S.SCH . ?atl_geo a geo:Geometry ; geo:asWKT ?place . ?school_geo geo:sf-within ?atl_geo .  ?school_geo geo:asWKT ?school_wkt . ?school gn:name ?school_name. } }';
 
   if (window.XMLHttpRequest)
   {
@@ -274,7 +153,7 @@ function Input(bottomLeft, topLeft, bottomRight, topRight)
       }
     }
   }
-  xmlhttp.open("GET","/map/sparql/" + (Math.round(topRight.lon * 10000) / 10000) + "/" + (Math.round(topRight.lat * 10000) / 10000) + "/" + (Math.round(bottomRight.lon * 10000) / 10000) + "/" + (Math.round(bottomRight.lat * 10000) / 10000) + "/" + (Math.round(bottomLeft.lon * 10000) / 10000) + "/" + (Math.round(bottomLeft.lat * 10000) / 10000) + "/" + (Math.round(topLeft.lon * 10000) / 10000) + "/" + (Math.round(topLeft.lat * 10000) / 10000) + "/", true);
+  xmlhttp.open("GET","/map/sparql/" + ((topRight.lon).toPrecision(6)) + "/" + ((topRight.lat).toPrecision(6)) + "/" + ((bottomRight.lon).toPrecision(6)) + "/" + ((bottomRight.lat).toPrecision(6)) + "/" + ((bottomLeft.lon).toPrecision(6)) + "/" + ((bottomLeft.lat).toPrecision(6)) + "/" + ((topLeft.lon).toPrecision(6)) + "/" + ((topLeft.lat).toPrecision(6)) + "/", true);
   xmlhttp.send();
 }
 
