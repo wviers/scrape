@@ -46,7 +46,6 @@ function onPopupClose(evt)
 }
 
 
-
 function init()
 {
 
@@ -69,7 +68,7 @@ var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
   map = new OpenLayers.Map('map', options);
 
 
- var SmallScale = new OpenLayers.Layer.ArcGIS93Rest( "SmallScale","http://raster1.nationalmap.gov/ArcGIS/rest/services/TNM_Small_Scale_Imagery/MapServer/export", {});
+ var smallScale = new OpenLayers.Layer.ArcGIS93Rest( "SmallScale","http://raster1.nationalmap.gov/ArcGIS/rest/services/TNM_Small_Scale_Imagery/MapServer/export", {});
 
 
 
@@ -103,8 +102,7 @@ var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
                 });
 
   map.addControl(new OpenLayers.Control.MousePosition());
-  map.addLayers([vectors, nationalMapWMS, SmallScale]);
-  map.addControl(new OpenLayers.Control.LayerSwitcher());
+  map.addLayers([vectors, nationalMapWMS, smallScale]);
   map.addControl(control);
 
   selectControl = new OpenLayers.Control.SelectFeature(vectors, {onSelect: onFeatureSelect, onUnselect: onFeatureUnselect});
@@ -116,10 +114,36 @@ var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
     map.addControl(drawControls[key]);
   }
 
+
+  nationalMapWMS.events.on(
+  {
+    moveend: function(e)
+           {
+             if (e.zoomChanged)
+             {
+               if(map.zoom < 12)
+                 map.setBaseLayer(smallScale);
+             }
+           }
+  });
+
+
+  smallScale.events.on(
+  {
+  moveend: function(e)
+           {
+             if (e.zoomChanged)
+             {
+               if(map.zoom >= 12)
+                 map.setBaseLayer(nationalMapWMS);
+             }
+           }
+  });
+
   var proj = new OpenLayers.Projection("EPSG:4326");
   var mercator = new OpenLayers.Projection("EPSG:900913");
   var point = new OpenLayers.LonLat(-84.445, 33.7991);
-  map.setCenter(point.transform(proj, mercator), 14);
+  map.setCenter(point.transform(proj, mercator), 12);
 }
 
 
