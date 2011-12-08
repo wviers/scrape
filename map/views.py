@@ -39,7 +39,6 @@ def make_request(request, TRLo, TRLa, BRLo, BRLa, BLLo, BLLa, TLLo, TLLa):
 
     conn.close
     
-    print data2
     items = len(data2['results']['bindings'])
     iterations = 0
     while (iterations < items):

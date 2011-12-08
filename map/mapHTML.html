@@ -168,8 +168,8 @@ function Input(bottomLeft, topLeft, bottomRight, topRight)
       var num;
       var list = [];
 	  count = 1;
-	  list = xmlhttp.responseText;
 	  list = JSON.parse(xmlhttp.responseText);
+
 	  while((count - 1) < list.length)
 	  {
         DeserializePoint(list[count - 1], list[count]);
@@ -181,12 +181,13 @@ function Input(bottomLeft, topLeft, bottomRight, topRight)
   xmlhttp.send();
 }
 
-function DeserializePoint(num, featureId)
+function DeserializePoint(WKT, featureId)
 {
   var coord;
   var bounds;
-
-  coord = new OpenLayers.Geometry.Point(parseFloat(num.substring(6, 14)), parseFloat(num.substring(16, 23)));
+  var space;
+  space = WKT.indexOf(' ');
+  coord = new OpenLayers.Geometry.Point(parseFloat(WKT.substring(6, space - 1)), parseFloat(WKT.substring(space + 1, WKT.length - 1)));
 
   var latLon = new OpenLayers.Projection("EPSG:4326");
   var mercator = new OpenLayers.Projection("EPSG:900913");
@@ -237,7 +238,7 @@ function toggleControl(element)
 </head>
 <body onload = "init()"
 <p> Press and hold the shift key, then click and drag the mouse to create a
-    rectangle that will be queried for schools.  Stay within the Atlanta area.</p>
+    rectangle that will be queried for schools.  Stay within the state of Georgia.</p>
 
 <div id="map" class="bigmap"></div>
 <ul id="controlToggle">
