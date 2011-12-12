@@ -1,6 +1,7 @@
 <html>
 <head>
 <script src="http://openlayers.org/api/OpenLayers.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
 <style type="text/css">
 .bigmap {
 	height: 512px;
@@ -10,11 +11,9 @@ li{
 	list-style: none;
 	}
 </style>
-<script type = "text/javascript">
+<script type="text/javascript" language="javascript">
 
 var map, vectors, formats, drawControls, selectControl, selectedFeature;
-
-
 
 function onFeatureUnselect(feature)
 {
@@ -46,16 +45,17 @@ function onPopupClose(evt)
 }
 
 
+
 function init()
 {
 
-var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
+  var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
         restrictedExtent = maxExtent.clone(),
         maxResolution = 156543.0339;
 
 
 
- var options = {
+  var options = {
         projection: new OpenLayers.Projection("EPSG:900913"),
         displayProjection: new OpenLayers.Projection("EPSG:4326"),
         units: "m",
@@ -68,7 +68,7 @@ var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
   map = new OpenLayers.Map('map', options);
 
 
- var smallScale = new OpenLayers.Layer.ArcGIS93Rest( "SmallScale","http://raster1.nationalmap.gov/ArcGIS/rest/services/TNM_Small_Scale_Imagery/MapServer/export", {});
+  var smallScale = new OpenLayers.Layer.ArcGIS93Rest( "SmallScale","http://raster1.nationalmap.gov/ArcGIS/rest/services/TNM_Small_Scale_Imagery/MapServer/export", {});
 
 
 
@@ -94,7 +94,7 @@ var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
 						var ul = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.left, bounds.top));
 						var lr = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.right, bounds.bottom));
 
-                        Input(OpenLayers.Layer.SphericalMercator.inverseMercator(ll.lon.toFixed(4), ll.lat.toFixed(4)),
+                        input(OpenLayers.Layer.SphericalMercator.inverseMercator(ll.lon.toFixed(4), ll.lat.toFixed(4)),
                         OpenLayers.Layer.SphericalMercator.inverseMercator(ul.lon.toFixed(4), ul.lat.toFixed(4)),
                         OpenLayers.Layer.SphericalMercator.inverseMercator(lr.lon.toFixed(4), lr.lat.toFixed(4)),
                         OpenLayers.Layer.SphericalMercator.inverseMercator(ur.lon.toFixed(4), ur.lat.toFixed(4)));
@@ -148,28 +148,47 @@ var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
 
 
 
-function Input(bottomLeft, topLeft, bottomRight, topRight)
+function toggleControl(element)
 {
-  var xmlhttp;
+  for(key in drawControls)
+  {
+    var control = drawControls[key];
+    if(element.value == key && element.checked)
+    {
+      control.activate();
+    }
+    else
+    {
+      control.deactivate();
+    }
+  }
+}
+
+
+
+function input(bottomLeft, topLeft, bottomRight, topRight)
+{
+  var xmlHTTP;
 
   if (window.XMLHttpRequest)
   {
-    xmlhttp = new XMLHttpRequest();
+    xmlHTTP = new XMLHttpRequest();
   }
   else
   {
-    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+    xmlHTTP = new ActiveXObject("Microsoft.XMLHTTP");
   }
 
-  xmlhttp.onreadystatechange=function()
+  xmlHTTP.onreadystatechange=function()
   {
-    if(xmlhttp.readyState == 4)
+    if(xmlHTTP.readyState == 4)
     {
+
       var num;
       var list = [];
 	  count = 1;
-	  list = JSON.parse(xmlhttp.responseText);
 
+	  list = jQuery.parseJSON(xmlHTTP.responseText);
 	  while((count - 1) < list.length)
 	  {
         DeserializePoint(list[count - 1], list[count]);
@@ -177,8 +196,8 @@ function Input(bottomLeft, topLeft, bottomRight, topRight)
       }
     }
   }
-  xmlhttp.open("GET","/map/sparql/" + ((topRight.lon).toPrecision(6)) + "/" + ((topRight.lat).toPrecision(6)) + "/" + ((bottomRight.lon).toPrecision(6)) + "/" + ((bottomRight.lat).toPrecision(6)) + "/" + ((bottomLeft.lon).toPrecision(6)) + "/" + ((bottomLeft.lat).toPrecision(6)) + "/" + ((topLeft.lon).toPrecision(6)) + "/" + ((topLeft.lat).toPrecision(6)) + "/", true);
-  xmlhttp.send();
+  xmlHTTP.open("GET","/map/sparql/" + ((topRight.lon).toPrecision(6)) + "/" + ((topRight.lat).toPrecision(6)) + "/" + ((bottomRight.lon).toPrecision(6)) + "/" + ((bottomRight.lat).toPrecision(6)) + "/" + ((bottomLeft.lon).toPrecision(6)) + "/" + ((bottomLeft.lat).toPrecision(6)) + "/" + ((topLeft.lon).toPrecision(6)) + "/" + ((topLeft.lat).toPrecision(6)) + "/", true);
+  xmlHTTP.send();
 }
 
 function DeserializePoint(WKT, featureId)
@@ -214,25 +233,8 @@ function DeserializePoint(WKT, featureId)
   }
   else
     element.value = 'Bad input ' + type;
-
 }
 
-
-function toggleControl(element)
-{
-  for(key in drawControls)
-  {
-    var control = drawControls[key];
-    if(element.value == key && element.checked)
-    {
-      control.activate();
-    }
-    else
-    {
-      control.deactivate();
-    }
-  }
-}
 
 </script>
 </head>
@@ -259,6 +261,8 @@ function toggleControl(element)
             <label for="selectToggle">Select Point on Click</label>
         </li>
     </ul>
+
+
 
 <p>Information on features made by the queries can be brought up by clicking the select points radio button and
    then clicking a point on the map. </p>
