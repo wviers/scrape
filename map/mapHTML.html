@@ -1,8 +1,15 @@
+<!--mapHTML.html contains imbedded an openlayers map using the usgs National Map
+large and small scale imagery and javascript functions used to query points
+on the map by passing coordinates of a bounding rectangle to a python
+function that performs a sparql query.  The resulting points are displayed on
+the map.
+wviers@usgs.gov Wayne Viers
+-->
 <html>
 <head>
-<script src="http://openlayers.org/api/OpenLayers.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
-<style type="text/css">
+<script src='http://openlayers.org/api/OpenLayers.js'></script>
+<script src='https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js'></script>
+<style type='text/css'>
 .bigmap {
 	height: 512px;
 	width: 1024px;
@@ -11,43 +18,65 @@ li{
 	list-style: none;
 	}
 </style>
-<script type="text/javascript" language="javascript">
+<script type='text/javascript'>
 
 var map, vectors, formats, drawControls, selectControl, selectedFeature;
 
-function onFeatureUnselect(feature)
-{
+/*
+Destroys popups when the feature they members of are unselected.
+Parameters:
+  {Openlayers.Feature} feature - The feature that is being unselected.
+Returns: None
+*/
+function onFeatureUnselect(feature){
   map.removePopup(feature.popup);
   feature.popup.destroy();
   feature.popup = null;
 }
 
 
-function onFeatureSelect(feature)
-{
+/*
+Creates popups when the feature is selected.
+Parameters:
+  {Openlayers.Feature} feature - The feature that is being selected.
+Returns: None
+*/
+function onFeatureSelect(feature){
   selectedFeature = feature;
-  var proj = new OpenLayers.Projection("EPSG:4326");
-  var mercator = new OpenLayers.Projection("EPSG:900913");
+  var proj = new OpenLayers.Projection('EPSG:4326');
+  var mercator = new OpenLayers.Projection('EPSG:900913');
 
-  popup = new OpenLayers.Popup.FramedCloud("popup", feature.geometry.getBounds().getCenterLonLat(),
-                        null,
-                        "<div style='font-size:.8em'>Point: " + feature.geometry.transform(mercator, proj).x + ", " + feature.geometry.y + " Name: " + feature.id +"</div>",
-                        null, true, onPopupClose);
+  popup = new OpenLayers.Popup.FramedCloud('popup',
+      feature.geometry.getBounds().getCenterLonLat(),null,
+      feature.id + ': ' + feature.geometry.transform(mercator, proj).x +
+          ','+feature.geometry.y,
+      null, true, onPopupClose);
+
   feature.geometry.transform(proj, mercator);
   feature.popup = popup;
   map.addPopup(popup);
 }
 
 
-function onPopupClose(evt)
-{
+/*
+Calls onFeatureUnselect when a popup is closed.
+Parameters:
+  {Openlayers.Event} evt - The popup close event.
+Returns: None
+*/
+function onPopupClose(evt){
   selectControl.unselect(selectedFeature);
 }
 
 
-
-function init()
-{
+/*
+Initializes the Openlayers map, its layers, the function that selects
+coordinates, and the events taht switch from the small to large scale
+maps
+Parameters:None
+Returns: None
+*/
+function init(){
 
   var maxExtent = new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
         restrictedExtent = maxExtent.clone(),
@@ -56,58 +85,61 @@ function init()
 
 
   var options = {
-        projection: new OpenLayers.Projection("EPSG:900913"),
-        displayProjection: new OpenLayers.Projection("EPSG:4326"),
-        units: "m",
+        projection: new OpenLayers.Projection('EPSG:900913'),
+        displayProjection: new OpenLayers.Projection('EPSG:4326'),
+        units: 'm',
         numZoomLevels: 18,
         maxResolution: maxResolution,
         maxExtent: maxExtent,
-        restrictedExtent: restrictedExtent
-    };
+        restrictedExtent: restrictedExtent};
 
   map = new OpenLayers.Map('map', options);
 
 
-  var smallScale = new OpenLayers.Layer.ArcGIS93Rest( "SmallScale","http://raster1.nationalmap.gov/ArcGIS/rest/services/TNM_Small_Scale_Imagery/MapServer/export", {});
+  var smallScale = new OpenLayers.Layer.ArcGIS93Rest( 'SmallScale',
+      'http://raster1.nationalmap.gov/ArcGIS/rest' +
+          '/services/TNM_Small_Scale_Imagery/MapServer/export',
+      {});
 
 
 
-  var nationalMapWMS = new OpenLayers.Layer.WMS("NationalMapLarge", "http://raster.nationalmap.gov/arcgis/services/Combined/TNM_Large_Scale_Imagery/MapServer/WMSServer", {layers: "0"});
+  var nationalMapWMS = new OpenLayers.Layer.WMS('NationalMapLarge',
+      'http://raster.nationalmap.gov/arcgis/services/Combined/' +
+          'TNM_Large_Scale_Imagery/MapServer/WMSServer',
+      {layers: '0'});
 
 
-  vectors = new OpenLayers.Layer.Vector("Vector Layer");
+  vectors = new OpenLayers.Layer.Vector('Vector Layer');
 
   var control = new OpenLayers.Control();
   OpenLayers.Util.extend(control, {draw: function () {
-                        // this Handler.Box will intercept the shift-mousedown
-                        // before Control.MouseDefault gets to see it
-                        this.box = new OpenLayers.Handler.Box( control,
-                            {"done": this.notice},
-                            {keyMask: OpenLayers.Handler.MOD_SHIFT});
-                        this.box.activate();
+      this.box = new OpenLayers.Handler.Box( control, {'done': this.notice},
+          {keyMask: OpenLayers.Handler.MOD_SHIFT});
+      this.box.activate(); },
 
-                    },
+      notice: function (bounds) {
+      var ll = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.left, bounds.bottom));
+      var ur = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.right, bounds.top));
+	  var ul = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.left, bounds.top));
+	  var lr = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.right, bounds.bottom));
 
-                    notice: function (bounds) {
-                        var ll = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.left, bounds.bottom));
-                        var ur = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.right, bounds.top));
-						var ul = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.left, bounds.top));
-						var lr = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.right, bounds.bottom));
-
-                        input(OpenLayers.Layer.SphericalMercator.inverseMercator(ll.lon.toFixed(4), ll.lat.toFixed(4)),
-                        OpenLayers.Layer.SphericalMercator.inverseMercator(ul.lon.toFixed(4), ul.lat.toFixed(4)),
-                        OpenLayers.Layer.SphericalMercator.inverseMercator(lr.lon.toFixed(4), lr.lat.toFixed(4)),
-                        OpenLayers.Layer.SphericalMercator.inverseMercator(ur.lon.toFixed(4), ur.lat.toFixed(4)));
-                               }
-                });
+      input(
+          OpenLayers.Layer.SphericalMercator.inverseMercator(ll.lon.toFixed(4), ll.lat.toFixed(4)),
+          OpenLayers.Layer.SphericalMercator.inverseMercator(ul.lon.toFixed(4), ul.lat.toFixed(4)),
+          OpenLayers.Layer.SphericalMercator.inverseMercator(lr.lon.toFixed(4), lr.lat.toFixed(4)),
+          OpenLayers.Layer.SphericalMercator.inverseMercator(ur.lon.toFixed(4), ur.lat.toFixed(4)));
+      }
+  });
 
   map.addControl(new OpenLayers.Control.MousePosition());
   map.addLayers([vectors, nationalMapWMS, smallScale]);
   map.addControl(control);
 
-  selectControl = new OpenLayers.Control.SelectFeature(vectors, {onSelect: onFeatureSelect, onUnselect: onFeatureUnselect});
-              drawControls = {polygon: new OpenLayers.Control.DrawFeature(vectors, OpenLayers.Handler.Point),
-                  select: selectControl};
+  selectControl = new OpenLayers.Control.SelectFeature(vectors,
+      {onSelect: onFeatureSelect, onUnselect: onFeatureUnselect});
+
+  drawControls = {polygon: new OpenLayers.Control.DrawFeature(vectors,
+      OpenLayers.Handler.Point), select: selectControl};
 
   for(var key in drawControls)
   {
@@ -115,118 +147,122 @@ function init()
   }
 
 
-  nationalMapWMS.events.on(
-  {
-    moveend: function(e)
-           {
-             if (e.zoomChanged)
-             {
-               if(map.zoom < 12)
-                 map.setBaseLayer(smallScale);
+  nationalMapWMS.events.on({
+    moveend: function(e){
+               if (e.zoomChanged){
+                 if(map.zoom < 12)
+                   map.setBaseLayer(smallScale);
+               }
              }
-           }
   });
 
 
-  smallScale.events.on(
-  {
-  moveend: function(e)
-           {
-             if (e.zoomChanged)
-             {
+  smallScale.events.on({moveend: function(e){
+             if (e.zoomChanged){
                if(map.zoom >= 12)
                  map.setBaseLayer(nationalMapWMS);
              }
            }
   });
 
-  var proj = new OpenLayers.Projection("EPSG:4326");
-  var mercator = new OpenLayers.Projection("EPSG:900913");
+  var proj = new OpenLayers.Projection('EPSG:4326');
+  var mercator = new OpenLayers.Projection('EPSG:900913');
   var point = new OpenLayers.LonLat(-84.445, 33.7991);
   map.setCenter(point.transform(proj, mercator), 12);
 }
 
 
 
-function toggleControl(element)
-{
-  for(key in drawControls)
-  {
+function toggleControl(element){
+  for(key in drawControls){
     var control = drawControls[key];
     if(element.value == key && element.checked)
-    {
       control.activate();
-    }
     else
-    {
       control.deactivate();
-    }
   }
 }
 
 
 
-function input(bottomLeft, topLeft, bottomRight, topRight)
-{
+/*
+Performs an ajax HTTP request that sends coordinates to the python function
+and calls DeserializePoint for each result recieved.
+Parameters:
+  {Openlayers.LonLat} bottomLeft - The bottom left coordinate of the user-selected
+      box.
+  {Openlayers.LonLat} topLeft - The top left coordinate of the user-selected
+      box.
+  {Openlayers.LonLat} bottomRight - The bottom right coordinate of the user-selected
+      box.
+  {Openlayers.LonLat} topRight - The top right coordinate of the user-selected
+      box.
+Returns: None
+*/
+function input(bottomLeft, topLeft, bottomRight, topRight){
   var xmlHTTP;
 
   if (window.XMLHttpRequest)
-  {
     xmlHTTP = new XMLHttpRequest();
-  }
   else
-  {
     xmlHTTP = new ActiveXObject("Microsoft.XMLHTTP");
-  }
 
-  xmlHTTP.onreadystatechange=function()
-  {
-    if(xmlHTTP.readyState == 4)
-    {
-
+  xmlHTTP.onreadystatechange=function(){
+    if(xmlHTTP.readyState == 4){
       var num;
       var list = [];
 	  count = 1;
 
 	  list = jQuery.parseJSON(xmlHTTP.responseText);
-	  while((count - 1) < list.length)
-	  {
+
+	  while((count - 1) < list.length){
         DeserializePoint(list[count - 1], list[count]);
         count+= 2;
       }
     }
   }
-  xmlHTTP.open("GET","/map/sparql/" + ((topRight.lon).toPrecision(6)) + "/" + ((topRight.lat).toPrecision(6)) + "/" + ((bottomRight.lon).toPrecision(6)) + "/" + ((bottomRight.lat).toPrecision(6)) + "/" + ((bottomLeft.lon).toPrecision(6)) + "/" + ((bottomLeft.lat).toPrecision(6)) + "/" + ((topLeft.lon).toPrecision(6)) + "/" + ((topLeft.lat).toPrecision(6)) + "/", true);
+  xmlHTTP.open('GET','/map/sparql/' +
+      ((topRight.lon).toPrecision(6)) + '/' + ((topRight.lat).toPrecision(6)) +
+      '/' + ((bottomRight.lon).toPrecision(6)) + '/' + ((bottomRight.lat).toPrecision(6)) +
+      '/' + ((bottomLeft.lon).toPrecision(6)) + '/' + ((bottomLeft.lat).toPrecision(6)) +
+      '/' + ((topLeft.lon).toPrecision(6)) + '/' + ((topLeft.lat).toPrecision(6)) +
+      '/',true);
   xmlHTTP.send();
 }
 
-function DeserializePoint(WKT, featureId)
-{
+
+/*
+Adds an Openlayers.Feature to the map
+Parameters:
+  {string} WKT - The coordinate to be added to the map, in WKT format.
+  {string} featureId - the name of the feature to be added to the map.
+      box.
+Returns: None
+*/
+function DeserializePoint(WKT, featureId){
   var coord;
   var bounds;
   var space;
   space = WKT.indexOf(' ');
-  coord = new OpenLayers.Geometry.Point(parseFloat(WKT.substring(6, space - 1)), parseFloat(WKT.substring(space + 1, WKT.length - 1)));
+  coord = new OpenLayers.Geometry.Point(parseFloat(WKT.substring(6, space - 1)),
+      parseFloat(WKT.substring(space + 1, WKT.length - 1)));
 
-  var latLon = new OpenLayers.Projection("EPSG:4326");
-  var mercator = new OpenLayers.Projection("EPSG:900913");
+  var latLon = new OpenLayers.Projection('EPSG:4326');
+  var mercator = new OpenLayers.Projection('EPSG:900913');
   coord = coord.transform(latLon, mercator);
 
   var features = new OpenLayers.Feature.Vector(coord);
   features.id = featureId;
 
-  if(features)
-  {
+  if(features){
     if(features.constructor != Array)
       features = [features];
 
-    for(var i=0; i<features.length; ++i)
-    {
+    for(var i=0; i<features.length; ++i){
       if (!bounds)
         bounds = features[i].geometry.getBounds();
       else
         bounds.extend(features[i].geometry.getBounds());
-
 
     }
     vectors.addFeatures(features);
@@ -238,34 +274,35 @@ function DeserializePoint(WKT, featureId)
 
 </script>
 </head>
-<body onload = "init()"
+<body onload = 'init()'
 <p> Press and hold the shift key, then click and drag the mouse to create a
-    rectangle that will be queried for schools.  Stay within the state of Georgia.</p>
+    rectangle that will be queried for schools.
+    Stay within the state of Georgia.</p>
 
-<div id="map" class="bigmap"></div>
-<ul id="controlToggle">
+<div id='map' class='bigmap'></div>
+<ul id='controlToggle'>
         <li>
-            <input type="radio" name="type" value="none" id="noneToggle"
-                   onclick="toggleControl(this);" checked="checked" />
-            <label for="noneToggle">Navigate</label>
+            <input type='radio' name='type' value='none' id='noneToggle'
+                   onclick='toggleControl(this);' checked='checked' />
+            <label for='noneToggle'>Navigate</label>
         </li>
         <li>
 
-            <input type="radio" name="type" value="polygon" id="polygonToggle"
-                   onclick="toggleControl(this);" />
-            <label for="polygonToggle">Draw Points</label>
+            <input type='radio' name='type' value='polygon' id='polygonToggle'
+                   onclick='toggleControl(this);' />
+            <label for='polygonToggle'>Draw Points</label>
         </li>
         <li>
-            <input type="radio" name="type" value="select" id="selectToggle"
-                   onclick="toggleControl(this);" />
-            <label for="selectToggle">Select Point on Click</label>
+            <input type='radio' name='type' value='select' id='selectToggle'
+                   onclick='toggleControl(this);' />
+            <label for='selectToggle'>Select Point on Click</label>
         </li>
     </ul>
 
 
 
-<p>Information on features made by the queries can be brought up by clicking the select points radio button and
-   then clicking a point on the map. </p>
+<p>Information on features made by the queries can be brought up by clicking the
+select points radio button and then clicking a point on the map. </p>
 </body>
 </html>
 
