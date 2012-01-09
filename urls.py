@@ -15,5 +15,7 @@ urlpatterns = patterns('',
     
     (r'^map/$', 'map.views.load_HTML'),
         
-   
+    (r'^rdfTest/$', 'rdfTest.views.load_HTML'),
+    
+    (r'^rdfTest/query/$', 'rdfTest.views.make_request'),
 )

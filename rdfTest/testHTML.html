@@ -1,0 +1,37 @@
+<html>
+<head>
+<script type = "text/javascript">
+
+
+function Input()
+{
+  var xmlhttp;
+
+  if (window.XMLHttpRequest)
+  {
+
+    xmlhttp=new XMLHttpRequest();
+  }
+
+  xmlhttp.onreadystatechange=function()
+  {
+    if(xmlhttp.readyState == 4)
+    {
+      var list = [];
+	  list = (xmlhttp.responseText);
+      alert(list);
+    }
+  }
+  xmlhttp.open("GET","/rdfTest/query/" ,true);
+  xmlhttp.send();
+}
+</script>
+</head>
+<body>
+
+<form>
+<input type="button" value="Send Query" onclick="Input()" />
+</form>
+
+</body>
+</html>
