@@ -53,7 +53,7 @@ def make_request(request):
              '?atl_geo . } }')
 
 
-    params = urllib.urlencode({'query':query, 'output':'json'})
+    params = urllib.urlencode({'query':query, 'output':'xml'})
     headers = {"Content-type": "application/x-www-form-urlencoded",
     "Accept": "text/plain"}
     conn = httplib.HTTPConnection("geosparql.bbn.com")
@@ -66,7 +66,6 @@ def make_request(request):
 			
     conn.close
     print response
-    print "DONE PRINTING"
     return HttpResponse(response)
 
 
