@@ -1,15 +1,14 @@
 <html>
 <head>
-<script type="text/javascript" src="jquery.rdfquery.rules.min-1.0">
-
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script type="text/javascript" src="/static/jquery.rdfquery.rules.min-1.0.js"></script>
+<script type="text/javascript">
 
 function Input()
 {
   var xmlhttp;
-
   if (window.XMLHttpRequest)
   {
-
     xmlhttp=new XMLHttpRequest();
   }
 
@@ -17,9 +16,12 @@ function Input()
   {
     if(xmlhttp.readyState == 4)
     {
+	  var store = jQuery.rdf.databank();
       var list = [];
 	  list = (xmlhttp.responseText);
-      alert(list);
+	  alert(store.size());
+      store.load(list);
+      alert(store.toString());
     }
   }
   xmlhttp.open("GET","/rdfTest/query/" ,true);
