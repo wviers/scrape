@@ -16,12 +16,20 @@ function Input()
   {
     if(xmlhttp.readyState == 4)
     {
-	  var store = jQuery.rdf.databank();
+      var rdfTriples = '<http://sws.geonames.org/4211129/> a  gn:Feature , geo:Feature ; <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> "http://sws.geonames.org/4211129/about.rdf" ; gn:countryCode "US" ; gn:featureClass gn:S ; gn:featureCode <http://www.geonames.org/ontology#S.SCH> ; gn:locationMap <http://www.geonames.org/4211129/mount-vernon-school.html> ; gn:name "Mount Vernon School" ; gn:nearbyFeatures <http://sws.geonames.org/4211129/nearby.rdf> ; gn:parentADM1 <http://sws.geonames.org/4197000/> ; gn:parentADM2 <http://sws.geonames.org/4196508/> ; gn:parentCountry <http://sws.geonames.org/6252001/> ; gn:parentFeature <http://sws.geonames.org/4196508/> ; gn:superFeature <http://sws.geonames.org/4196508/> ; geo:hasGeometry <http://parliament.semwebcentral.org/geosparql/geonames/geometry#4211129> ; <http://www.w3.org/2003/01/geo/wgs84_pos#alt> "267" ; <http://www.w3.org/2003/01/geo/wgs84_pos#lat> "33.80233" ; <http://www.w3.org/2003/01/geo/wgs84_pos#long> "-84.44048" .';
+	  var store = jQuery.rdf();
       var list = [];
+      var result;
 	  list = (xmlhttp.responseText);
-	  alert(store.size());
-      store.load(list);
-      alert(store.toString());
+	  store.prefix('gn', "http://www.geonames.org/ontology#");
+	  store.prefix('geo', "http://www.opengis.net/ont/OGC-GeoSPARQL/1.0/");
+      store.load(rdfTriples);
+      alert(store.databank.size());
+      result = store.where('geo:feature gn:name "Mount Vernon School"');
+      alert(jQuery.rdf.dump(store.sources(), {serialize: true, format: 'application/rdf+xml', }));
+
+      alert("END");
+
     }
   }
   xmlhttp.open("GET","/rdfTest/query/" ,true);
