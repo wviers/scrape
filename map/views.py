@@ -37,7 +37,6 @@ def make_request(request, TRLo, TRLa, BRLo, BRLa, BLLo, BLLa, TLLo, TLLa):
     Raises:
         None.
     """
-    print "IN THE PYTHON"
     
     response = []
     return_list = []

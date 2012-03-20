@@ -106,7 +106,9 @@ TEMPLATE_DIRS = (
 	"/cygdrive/d/My Files/code/scrape/tweet/",
 	"/cygdrive/d/My Files/code/scrape/parliment/",
 	"/cygdrive/d/My Files/code/scrape/map/",
+    "/cygdrive/d/My Files/code/scrape/sparqleUpdate/",
 	"/cygdrive/d/My Files/code/scrape/rdfTest/"
+
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -122,7 +124,8 @@ INSTALLED_APPS = (
     'scrape.tweet',
     'scrape.parliment',
     'scrape.map',
-    'scrape.rdfTest'
+    'scrape.rdfTest',
+	'scrape.sparqleUpdate'
     
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',

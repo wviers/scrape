@@ -1,0 +1,36 @@
+<html>
+<head>
+<script type = "text/javascript">
+
+
+function Input()
+{
+  var query;
+  var xmlhttp;
+  
+  if (window.XMLHttpRequest)
+  {
+
+    xmlhttp=new XMLHttpRequest();
+  }
+
+  xmlhttp.onreadystatechange=function()
+  {
+    if(xmlhttp.readyState == 4)
+    {
+        alert("Update Completed");
+    }
+  }
+  xmlhttp.open("GET","/sparqleUpdate/sparql/");
+  xmlhttp.send();
+}
+</script>
+</head>
+<body>
+
+<form>
+<input type="button" value="Send Update" onclick="Input()"/>
+</form>
+
+</body>
+</html>

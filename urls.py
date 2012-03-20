@@ -20,4 +20,8 @@ urlpatterns = patterns('',
     (r'^rdfTest/query/$', 'rdfTest.views.make_request'),
     
     (r'^rdfTest/jquery.rdfquery.rules.min-1.0/$', 'rdfTest.views.make_request'),
+	
+	(r'^sparqleUpdate/$', 'sparqleUpdate.views.load_HTML'),
+	
+	(r'^sparqleUpdate/sparql/$', 'sparqleUpdate.views.make_update'),
 )
