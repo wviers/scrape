@@ -107,7 +107,8 @@ TEMPLATE_DIRS = (
 	"/cygdrive/d/My Files/code/scrape/parliment/",
 	"/cygdrive/d/My Files/code/scrape/map/",
     "/cygdrive/d/My Files/code/scrape/sparqleUpdate/",
-	"/cygdrive/d/My Files/code/scrape/rdfTest/"
+	"/cygdrive/d/My Files/code/scrape/rdfTest/",
+    "/cygdrive/d/My Files/code/scrape/mapUpdate/"
 
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.

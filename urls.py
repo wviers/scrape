@@ -24,4 +24,6 @@ urlpatterns = patterns('',
 	(r'^sparqleUpdate/$', 'sparqleUpdate.views.load_HTML'),
 	
 	(r'^sparqleUpdate/sparql/$', 'sparqleUpdate.views.make_update'),
+	
+    (r'^mapUpdate/$', 'mapUpdate.views.load_HTML'),
 )

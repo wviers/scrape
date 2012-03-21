@@ -1,3 +1,4 @@
+
 """
 USGS Rolla
 Wayne Viers
@@ -66,7 +67,6 @@ def make_request(request, TRLo, TRLa, BRLo, BRLa, BLLo, BLLa, TLLo, TLLa):
     if r1.status == 200: 
         response = r1.read()
 	try: 
-	    print response
 	    data2 = json.loads(response)
 	except:
 	    return 'BROKEN DATA'
