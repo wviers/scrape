@@ -87,7 +87,7 @@ def make_request(request, TRLo, TRLa, BRLo, BRLa, BLLo, BLLa, TLLo, TLLa):
 
 
 def load_HTML(request):
-    return render_to_response('mapHTML.html')
+    return render_to_response('mapUpdate.html')
     
     
     

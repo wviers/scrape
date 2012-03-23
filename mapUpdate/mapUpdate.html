@@ -19,7 +19,6 @@ li{
 	}
 </style>
 <script type='text/javascript'>
-
 var map, vectors, formats, drawControls, selectControl, selectedFeature;
 
 /*
@@ -29,9 +28,8 @@ Parameters:
 Returns: None
 */
 function onFeatureUnselect(feature){
-  map.removePopup(feature.popup);
-  feature.popup.destroy();
-  feature.popup = null;
+  document.getElementById("data").style.visibility = "hidden";
+  document.getElementById("selected").style.visibility = "hidden";
 }
 
 
@@ -46,32 +44,20 @@ function onFeatureSelect(feature){
   var proj = new OpenLayers.Projection('EPSG:4326');
   var mercator = new OpenLayers.Projection('EPSG:900913');
 
-  popup = new OpenLayers.Popup.FramedCloud('popup',
-      feature.geometry.getBounds().getCenterLonLat(),null,
-      feature.id + ': ' + feature.geometry.transform(mercator, proj).x +
-          ','+feature.geometry.y,
-      null, true, onPopupClose);
-
+	  
+  document.getElementById("selected").innerHTML="" + Math.round(feature.geometry.transform(mercator, proj).x * 1000) / 1000 
+  + ' , ' + Math.round(feature.geometry.y * 1000) / 1000;
+  
+  document.getElementById("data").style.visibility = "visible";
+  document.getElementById("selected").style.visibility = "visible";
+  
   feature.geometry.transform(proj, mercator);
-  feature.popup = popup;
-  map.addPopup(popup);
-}
-
-
-/*
-Calls onFeatureUnselect when a popup is closed.
-Parameters:
-  {Openlayers.Event} evt - The popup close event.
-Returns: None
-*/
-function onPopupClose(evt){
-  selectControl.unselect(selectedFeature);
 }
 
 
 /*
 Initializes the Openlayers map, its layers, the function that selects
-coordinates, and the events taht switch from the small to large scale
+coordinates, and the events that switch from the small to large scale
 maps
 Parameters:None
 Returns: None
@@ -199,9 +185,9 @@ Parameters:
       box.
 Returns: None
 */
-function input(bottomLeft, topLeft, bottomRight, topRight){
+function input(form){
   var xmlHTTP;
-
+  alert("DD");
   if (window.XMLHttpRequest)
     xmlHTTP = new XMLHttpRequest();
   else
@@ -231,53 +217,15 @@ function input(bottomLeft, topLeft, bottomRight, topRight){
 }
 
 
-/*
-Adds an Openlayers.Feature to the map
-Parameters:
-  {string} WKT - The coordinate to be added to the map, in WKT format.
-  {string} featureId - the name of the feature to be added to the map.
-      box.
-Returns: None
-*/
-function DeserializePoint(WKT, featureId){
-  var coord;
-  var bounds;
-  var space;
-  space = WKT.indexOf(' ');
-  coord = new OpenLayers.Geometry.Point(parseFloat(WKT.substring(6, space - 1)),
-      parseFloat(WKT.substring(space + 1, WKT.length - 1)));
-
-  var latLon = new OpenLayers.Projection('EPSG:4326');
-  var mercator = new OpenLayers.Projection('EPSG:900913');
-  coord = coord.transform(latLon, mercator);
-
-  var features = new OpenLayers.Feature.Vector(coord);
-  features.id = featureId;
-
-  if(features){
-    if(features.constructor != Array)
-      features = [features];
-
-    for(var i=0; i<features.length; ++i){
-      if (!bounds)
-        bounds = features[i].geometry.getBounds();
-      else
-        bounds.extend(features[i].geometry.getBounds());
-
-    }
-    vectors.addFeatures(features);
-  }
-  else
-    element.value = 'Bad input ' + type;
-}
 
 
 </script>
 </head>
-<body onload = 'init()'
-<p> Press and hold the shift key, then click and drag the mouse to create a
-    rectangle that will be queried for schools.
-    Stay within the state of Georgia.</p>
+<body onload = 'init()'>
+<p> Click the draw points radio button to be able to create features on the map.  
+After you have a drawn features select them by clicking them with select points 
+radio button selected.  Finally triples can be added to the store by submitting
+the features name. </p>
 
 <div id='map' class='bigmap'></div>
 <ul id='controlToggle'>
@@ -303,6 +251,15 @@ function DeserializePoint(WKT, featureId){
 
 <p>Information on features made by the queries can be brought up by clicking the
 select points radio button and then clicking a point on the map. </p>
+
+
+<form id="data" style="visibility:hidden">
+Enter the name of the selected Feature <input type= "text" name= "user" />
+<input type= "button" value= "Submit Triples" onclick= "input(this.form)" />
+</form> 
+
+<p id="selected"> </p>
+
 </body>
 </html>
 
