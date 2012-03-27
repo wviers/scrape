@@ -19,21 +19,20 @@ def make_update(request, featureName, lon, lat):
     response = []
     return_list = []
     graph = urllib.quote('http://waynetest.example.org/')
-
 	
-    query = ("""
-		PREFIX gn: <http://www.geonames.org/ontology#> 
-		PREFIX geo: <http://www.opengis.net/def/geosparql/>
-		INSERT DATA { 
-        GRAPH <http://waynetest.example.org/> { 
-		<http://waynetest.example.org/var3> gn:name featureName.
-		<http://waynetest.example.org/var3geo/> a geo:geometry
-		<http://waynetest.example.org/var3> geo:hasGeometry <http://waynetest.example.org/var3geo/>
-		<http://waynetest.example.org/var3geo/> asWKT: "POINT(" + coordString + ")"
-		 } } 
-			""")
+    index = get_index()
+	
+    query = ('PREFIX gn: <http://www.geonames.org/ontology#>  '
+		'PREFIX geo: <http://www.opengis.net/def/geosparql/> '
+		'INSERT DATA { ' 
+        'GRAPH <http://waynetest.example.org/> { '
+		'<http://waynetest.example.org/#3> gn:name ' +  '"' + featureName + '"' + '. '  
+		'<http://waynetest.example.org/#3geo/> a geo:geometry. '
+		'<http://waynetest.example.org/#3> geo:hasGeometry <http://waynetest.example.org/var3geo/>. '
+		'<http://waynetest.example.org/#3geo/> geo:asWKT "POINT(' + lon + ' ' + lat + ')". '
+		 '} } ')
 
-    print query
+
     params = urllib.urlencode({'update':query, 'output':'json'})
     headers = {"Content-type": "application/x-www-form-urlencoded",
     "Accept": "text/plain"}
@@ -50,6 +49,51 @@ def make_update(request, featureName, lon, lat):
 
     return response
 
+	
+def get_index():
+    response = []
+    return_list = []
+    index = ''
+	
+    graph = urllib.quote('http://waynetest.example.org/')
+
+    query = ('PREFIX gn: <http://www.geonames.org/ontology#>'
+        'SELECT DISTINCT ?item WHERE { GRAPH <http://waynetest.example.org/> {'
+        '?item gn:name ?name. }}')
+
+    params = urllib.urlencode({'query':query, 'output':'json'})
+    headers = {"Content-type": "application/x-www-form-urlencoded",
+    "Accept": "text/plain"}
+    conn = httplib.HTTPConnection("usgs-ybother.srv.mst.edu:8890")
+    conn.request("POST", "/parliament/sparql?graph=" + graph, params, headers)
+    r1 = conn.getresponse()
+    print r1.status, r1.reason
+	
+    if r1.status == 200: 
+        response = r1.read()
+	try: 
+	    data2 = json.loads(response)
+	except:
+	    return 'BROKEN DATA'
+    elif (r1.status == 400):
+        return "400"
+			
+    conn.close
+
+    print data2['results']['bindings'][0]['item']['value']
+	
+    characters = list(data2['results']['bindings'][0]['item']['value'])
+    start = data2['results']['bindings'][0]['item']['value'].index('#') + 1
+
+    while start < len(characters):
+        index = index + characters[start]
+        start = start + 1
+	
+
+	print index
+    
+	return data2
+	
 
 def load_HTML(request):
     return render_to_response('mapUpdate.html')
