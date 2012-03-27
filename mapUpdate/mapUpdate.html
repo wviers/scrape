@@ -45,8 +45,8 @@ function onFeatureSelect(feature){
   var mercator = new OpenLayers.Projection('EPSG:900913');
 
 	  
-  document.getElementById("selected").innerHTML="" + Math.round(feature.geometry.transform(mercator, proj).x * 1000) / 1000 
-  + ' , ' + Math.round(feature.geometry.y * 1000) / 1000;
+  document.getElementById("selected").innerHTML="" + feature.geometry.transform(mercator, proj).x 
+  + ' ' + feature.geometry.y;
   
   document.getElementById("data").style.visibility = "visible";
   document.getElementById("selected").style.visibility = "visible";
@@ -98,24 +98,6 @@ function init(){
   vectors = new OpenLayers.Layer.Vector('Vector Layer');
 
   var control = new OpenLayers.Control();
-  OpenLayers.Util.extend(control, {draw: function () {
-      this.box = new OpenLayers.Handler.Box( control, {'done': this.notice},
-          {keyMask: OpenLayers.Handler.MOD_SHIFT});
-      this.box.activate(); },
-
-      notice: function (bounds) {
-      var ll = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.left, bounds.bottom));
-      var ur = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.right, bounds.top));
-	  var ul = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.left, bounds.top));
-	  var lr = map.getLonLatFromPixel(new OpenLayers.Pixel(bounds.right, bounds.bottom));
-
-      input(
-          OpenLayers.Layer.SphericalMercator.inverseMercator(ll.lon.toFixed(4), ll.lat.toFixed(4)),
-          OpenLayers.Layer.SphericalMercator.inverseMercator(ul.lon.toFixed(4), ul.lat.toFixed(4)),
-          OpenLayers.Layer.SphericalMercator.inverseMercator(lr.lon.toFixed(4), lr.lat.toFixed(4)),
-          OpenLayers.Layer.SphericalMercator.inverseMercator(ur.lon.toFixed(4), ur.lat.toFixed(4)));
-      }
-  });
 
   map.addControl(new OpenLayers.Control.MousePosition());
   map.addLayers([vectors, nationalMapWMS, smallScale]);
@@ -187,7 +169,17 @@ Returns: None
 */
 function input(form){
   var xmlHTTP;
-  alert("DD");
+  var featureName = form.user.value;
+  var coordString = document.getElementById("selected").innerHTML;
+  var lon = coordString.slice(0, coordString.indexOf(" "));
+  var lat = coordString.slice(coordString.indexOf(" "));
+  
+  lon = parseFloat(lon);
+  lat = parseFloat(lat);
+ 
+  alert(lon * -1);
+  alert(lat);
+  
   if (window.XMLHttpRequest)
     xmlHTTP = new XMLHttpRequest();
   else
@@ -195,28 +187,15 @@ function input(form){
 
   xmlHTTP.onreadystatechange=function(){
     if(xmlHTTP.readyState == 4){
-      var num;
-      var list = [];
-	  count = 1;
-
-	  list = jQuery.parseJSON(xmlHTTP.responseText);
-
-	  while((count - 1) < list.length){
-        DeserializePoint(list[count - 1], list[count]);
-        count+= 2;
-      }
+      document.getElementById("selected").innerHTML = form.user.value +
+	 "has been added to the triple store";
+	  document.getElementById("data").style.visibility = "hidden";
     }
   }
-  xmlHTTP.open('GET','/map/sparql/' +
-      ((topRight.lon).toPrecision(6)) + '/' + ((topRight.lat).toPrecision(6)) +
-      '/' + ((bottomRight.lon).toPrecision(6)) + '/' + ((bottomRight.lat).toPrecision(6)) +
-      '/' + ((bottomLeft.lon).toPrecision(6)) + '/' + ((bottomLeft.lat).toPrecision(6)) +
-      '/' + ((topLeft.lon).toPrecision(6)) + '/' + ((topLeft.lat).toPrecision(6)) +
-      '/',true);
+  xmlHTTP.open('GET','/mapUpdate/sparql/' + encodeURI(featureName) + '/' + 
+  lon.toPrecision(6) + '/' + lat.toPrecision(6) + '/',true);
   xmlHTTP.send();
 }
-
-
 
 
 </script>
@@ -254,8 +233,8 @@ select points radio button and then clicking a point on the map. </p>
 
 
 <form id="data" style="visibility:hidden">
-Enter the name of the selected Feature <input type= "text" name= "user" />
-<input type= "button" value= "Submit Triples" onclick= "input(this.form)" />
+Enter the name of the selected Feature <input type="text" name="user" />
+<input type="button" value="Submit Triples" onclick="input(this.form)" />
 </form> 
 
 <p id="selected"> </p>

@@ -26,4 +26,6 @@ urlpatterns = patterns('',
 	(r'^sparqleUpdate/sparql/$', 'sparqleUpdate.views.make_update'),
 	
     (r'^mapUpdate/$', 'mapUpdate.views.load_HTML'),
+	
+	(r'^mapUpdate/sparql/(?P<featureName>\w+)/(?P<lon>-?\d+\.\d{4})/(?P<lat>-?\d+\.\d{4})/$', 'mapUpdate.views.make_update'),
 )
