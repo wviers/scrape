@@ -21,18 +21,19 @@ def make_update(request, featureName, lon, lat):
     graph = urllib.quote('http://waynetest.example.org/')
 	
     index = get_index()
-	
+    index = str(index)
+ 
     query = ('PREFIX gn: <http://www.geonames.org/ontology#>  '
 		'PREFIX geo: <http://www.opengis.net/def/geosparql/> '
 		'INSERT DATA { ' 
         'GRAPH <http://waynetest.example.org/> { '
-		'<http://waynetest.example.org/#3> gn:name ' +  '"' + featureName + '"' + '. '  
-		'<http://waynetest.example.org/#3geo/> a geo:geometry. '
-		'<http://waynetest.example.org/#3> geo:hasGeometry <http://waynetest.example.org/var3geo/>. '
-		'<http://waynetest.example.org/#3geo/> geo:asWKT "POINT(' + lon + ' ' + lat + ')". '
-		 '} } ')
+		'<http://waynetest.example.org/#' + index + '> gn:name ' +  '"' + featureName + '"' + '. '  
+		'<http://waynetest.example.org/#' + index + 'geo/> a geo:geometry. '
+		'<http://waynetest.example.org/#' + index + '> geo:hasGeometry <http://waynetest.example.org/var3geo/>. '
+		'<http://waynetest.example.org/#' + index + 'geo/> geo:asWKT "POINT(' + lon + ' ' + lat + ')". '
+		'} } ')
 
-
+	
     params = urllib.urlencode({'update':query, 'output':'json'})
     headers = {"Content-type": "application/x-www-form-urlencoded",
     "Accept": "text/plain"}
@@ -54,7 +55,6 @@ def get_index():
     response = []
     return_list = []
     index = ''
-	
     graph = urllib.quote('http://waynetest.example.org/')
 
     query = ('PREFIX gn: <http://www.geonames.org/ontology#>'
@@ -71,6 +71,7 @@ def get_index():
 	
     if r1.status == 200: 
         response = r1.read()
+
 	try: 
 	    data2 = json.loads(response)
 	except:
@@ -80,19 +81,17 @@ def get_index():
 			
     conn.close
 
-    print data2['results']['bindings'][0]['item']['value']
+    if len(data2['results']['bindings']) == 0:
+        index = '0'
+    else:
+        characters = list(data2['results']['bindings'][0]['item']['value'])
+        start = data2['results']['bindings'][0]['item']['value'].index('#') + 1
+        while start < len(characters):
+            index = index + characters[start]
+            start = start + 1
 	
-    characters = list(data2['results']['bindings'][0]['item']['value'])
-    start = data2['results']['bindings'][0]['item']['value'].index('#') + 1
-
-    while start < len(characters):
-        index = index + characters[start]
-        start = start + 1
-	
-
-	print index
-    
-	return data2
+    index = int(index) + 1
+    return index
 	
 
 def load_HTML(request):
