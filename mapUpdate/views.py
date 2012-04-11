@@ -28,9 +28,9 @@ def make_update(request, featureName, lon, lat):
 		'INSERT DATA { ' 
         'GRAPH <http://waynetest.example.org/> { '
 		'<http://waynetest.example.org/#' + index + '> gn:name ' +  '"' + featureName + '"' + '. '  
-		'<http://waynetest.example.org/#' + index + 'geo/> a geo:geometry. '
-		'<http://waynetest.example.org/#' + index + '> geo:hasGeometry <http://waynetest.example.org/var3geo/>. '
-		'<http://waynetest.example.org/#' + index + 'geo/> geo:asWKT "POINT(' + lon + ' ' + lat + ')". '
+		'<http://waynetest.example.org/#' + index + 'geo/> a geo:Geometry. '
+		'<http://waynetest.example.org/#' + index + '> geo:hasGeometry <http://waynetest.example.org/#' + index + 'geo/>. '
+		'<http://waynetest.example.org/#' + index + 'geo/> geo:asWKT "POINT( ' + lon + ' ' + lat + ' )". '
 		'} } ')
 
 	
