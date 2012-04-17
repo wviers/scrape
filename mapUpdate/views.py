@@ -25,12 +25,13 @@ def make_update(request, featureName, lon, lat):
  
     query = ('PREFIX gn: <http://www.geonames.org/ontology#>  '
 		'PREFIX geo: <http://www.opengis.net/def/geosparql/> '
+		'PREFIX sf: <http://www.opengis.net/def/sf/> PREFIX sf: <http://www.opengis.net/def/sf/> '
 		'INSERT DATA { ' 
         'GRAPH <http://waynetest.example.org/> { '
 		'<http://waynetest.example.org/#' + index + '> gn:name ' +  '"' + featureName + '"' + '. '  
-		'<http://waynetest.example.org/#' + index + 'geo/> a geo:Geometry. '
-		'<http://waynetest.example.org/#' + index + '> geo:hasGeometry <http://waynetest.example.org/#' + index + 'geo/>. '
-		'<http://waynetest.example.org/#' + index + 'geo/> geo:asWKT "POINT( ' + lon + ' ' + lat + ' )". '
+		'<http://waynetest.example.org/#' + index + 'geo> a geo:Geometry. '
+		'<http://waynetest.example.org/#' + index + '> geo:hasGeometry <http://waynetest.example.org/#' + index + 'geo>. '
+		'<http://waynetest.example.org/#' + index + 'geo> geo:asWKT "POINT( ' + lon + ' ' + lat + ' )"^^sf:wktLiteral. '
 		'} } ')
 
 	
